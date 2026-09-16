@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1280,initial-scale=1">
+<title>본사 어드민 — 지점 목록</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+*{font-family:'Pretendard',-apple-system,sans-serif;box-sizing:border-box;margin:0;padding:0}
+body{background:#E8EDE1;color:#1A2012;min-height:100vh;min-width:1080px}
+.sb{width:220px;background:#253016;height:100vh;position:fixed;left:0;top:0;display:flex;flex-direction:column;z-index:100}
+.sb-logo{padding:18px 16px 14px;border-bottom:1px solid rgba(255,255,255,0.1);display:flex;align-items:center;gap:10px;flex-shrink:0}
+.sb-icon{width:34px;height:34px;background:#E4FD97;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sb-nav{flex:1;padding:8px;overflow-y:auto}
+.sb-sec{font-size:10px;color:rgba(255,255,255,0.35);padding:12px 10px 4px;letter-spacing:.8px;font-weight:700;text-transform:uppercase}
+.ni{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:9px;color:rgba(255,255,255,0.6);font-size:13px;font-weight:500;cursor:pointer;text-decoration:none;transition:background .15s}
+.ni:hover{background:rgba(255,255,255,0.07);color:#fff}
+.ni.on{background:rgba(228,253,151,0.15);color:#E4FD97;font-weight:700}
+.sb-user{padding:12px 14px;border-top:1px solid rgba(255,255,255,0.1);display:flex;align-items:center;gap:9px;flex-shrink:0}
+.sb-av{width:30px;height:30px;background:rgba(228,253,151,0.18);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.main{margin-left:220px;min-height:100vh}
+.ph{background:#fff;border-bottom:1px solid #E0E8D5;padding:0 28px;height:58px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+.ph-title{font-size:17px;font-weight:800;color:#1A2012}
+.ph-sub{font-size:11px;color:#8C9C7A;margin-top:1px}
+.content{padding:24px 28px}
+.card{background:#fff;border-radius:15px;overflow:hidden;box-shadow:0 1px 3px rgba(30,40,18,0.05),0 4px 10px rgba(30,40,18,0.04)}
+table{width:100%;border-collapse:collapse}
+th{background:#F8FAF5;color:#8C9C7A;font-size:11px;font-weight:700;padding:10px 14px;text-align:left;border-bottom:1px solid #EEF2E9}
+td{padding:11px 14px;border-bottom:1px solid #F0F4EC;font-size:13px;color:#1A2012;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#FAFCF8}
+.pill{display:inline-flex;align-items:center;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap}
+.pg{background:#dcfce7;color:#15803d}.pw{background:#fef9c3;color:#a16207}.pc{background:#fee2e2;color:#b91c1c}.pb{background:#dbeafe;color:#1d4ed8}
+.btn{border:none;border-radius:9px;padding:8px 16px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Pretendard',sans-serif;display:inline-flex;align-items:center;gap:5px;white-space:nowrap;transition:background .15s}
+.btp{background:#253016;color:#E4FD97}.btp:hover{background:#3D4F28}
+.btg{background:#F0F5E8;color:#253016;border:none;cursor:pointer;font-family:'Pretendard',sans-serif;font-weight:600;display:inline-flex;align-items:center;border-radius:7px;padding:6px 12px;font-size:12px}
+.btg:hover{background:#E4EDD8}
+.btd{background:#FEF2F2;color:#DC2626;border:none;cursor:pointer;font-family:'Pretendard',sans-serif;font-weight:600;display:inline-flex;align-items:center;border-radius:7px;padding:6px 12px;font-size:12px}
+.btd:hover{background:#FEE2E2}
+input[type=text],select{border:1.5px solid #DDE6D0;border-radius:9px;padding:8px 13px;font-size:13px;color:#1A2012;background:#fff;font-family:'Pretendard',sans-serif;outline:none}
+input[type=text]:focus,select:focus{border-color:#253016}
+.sw{position:relative;display:inline-flex;align-items:center}
+.sw svg{position:absolute;left:11px;pointer-events:none;color:#8C9C7A}
+.sw input{padding-left:34px;width:240px}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.35);z-index:200;align-items:center;justify-content:center}
+.modal{background:#fff;border-radius:18px;padding:28px;width:500px;max-width:90vw}
+.modal h3{font-size:16px;font-weight:800;color:#1A2012;margin-bottom:20px}
+.frow{display:flex;flex-direction:column;gap:14px;margin-bottom:20px}
+.fitem label{font-size:12px;font-weight:700;color:#5A6A48;display:block;margin-bottom:5px}
+.fitem input,.fitem select{width:100%}
+.fitem textarea{width:100%;border:1.5px solid #DDE6D0;border-radius:9px;padding:9px 13px;font-size:13px;color:#1A2012;font-family:'Pretendard',sans-serif;outline:none;resize:vertical;min-height:72px}
+.fitem textarea:focus{border-color:#253016}
+.frow-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+</style>
+</head>
+<body>
+
+<aside class="sb">
+  <div class="sb-logo">
+    <div class="sb-icon"><span style="font-size:15px;font-weight:900;color:#253016;font-family:Arial,sans-serif">무</span></div>
+    <div>
+      <div style="font-size:12px;font-weight:800;color:#fff;line-height:1.3">무인화연구소</div>
+      <div style="font-size:10px;color:rgba(255,255,255,0.42)">본사 어드민</div>
+    </div>
+  </div>
+  <nav class="sb-nav">
+    <div class="sb-sec">운영</div>
+    <a href="mockup-hq-대시보드.html" class="ni">
+      <svg width="15" height="15" fill="none" viewBox="0 0 16 16"><rect x="1" y="1" width="6" height="6" rx="1.5" fill="currentColor" opacity=".85"/><rect x="9" y="1" width="6" height="6" rx="1.5" fill="currentColor" opacity=".85"/><rect x="1" y="9" width="6" height="6" rx="1.5" fill="currentColor" opacity=".85"/><rect x="9" y="9" width="6" height="6" rx="1.5" fill="currentColor" opacity=".85"/></svg>
+      대시보드
+    </a>
+    <a href="mockup-hq-지점목록.html" class="ni on">
+      <svg width="15" height="15" fill="none" viewBox="0 0 16 16"><path d="M2 14V7l6-5 6 5v7H2z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><rect x="5.5" y="9" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.4"/></svg>
+      지점 목록
+    </a>
+    <a href="mockup-hq-계정관리.html" class="ni">
+      <svg width="15" height="15" fill="none" viewBox="0 0 16 16"><circle cx="8" cy="5" r="3" stroke="currentColor" stroke-width="1.4"/><path d="M2 14c0-3.314 2.686-5 6-5s6 1.686 6 5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+      계정 관리
+    </a>
+    <div class="sb-sec" style="margin-top:4px">콘텐츠</div>
+    <a href="mockup-hq-공지관리.html" class="ni">
+      <svg width="15" height="15" fill="none" viewBox="0 0 16 16"><path d="M2 12V4a1 1 0 0 1 1-1h4l1.5 2H13a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1z" stroke="currentColor" stroke-width="1.4"/></svg>
+      공지 관리
+    </a>
+    <a href="mockup-hq-자료관리.html" class="ni">
+      <svg width="15" height="15" fill="none" viewBox="0 0 16 16"><path d="M3 4.5h10M3 8h6M3 11.5h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      자료 관리
+    </a>
+    <a href="mockup-hq-문의관리.html" class="ni">
+      <svg width="15" height="15" fill="none" viewBox="0 0 16 16"><path d="M2 3a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1H5l-3 2V3z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
+      문의 관리
+    </a>
+    <a href="mockup-hq-서비스요청관리.html" class="ni">
+      <svg width="15" height="15" fill="none" viewBox="0 0 16 16"><rect x="2" y="3" width="12" height="11" rx="1.5" stroke="currentColor" stroke-width="1.4"/><path d="M5 6.5h6M5 9.5h4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><path d="M5.5 1.5h5v2h-5z" stroke="currentColor" stroke-width="1.3"/></svg>
+      서비스 요청
+    </a>
+  </nav>
+  <div class="sb-user">
+    <div class="sb-av"><span style="font-size:12px;font-weight:800;color:#E4FD97">박</span></div>
+    <div style="flex:1;min-width:0">
+      <div style="font-size:12px;font-weight:700;color:#fff">박소영</div>
+      <div style="font-size:10px;color:rgba(255,255,255,0.42)">본사 관리자</div>
+    </div>
+    <button style="background:none;border:none;cursor:pointer;padding:4px;opacity:.4;color:#fff">
+      <svg width="13" height="13" fill="none" viewBox="0 0 16 16"><path d="M6 14H3a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1h3M10 11l4-3-4-3M14 8H6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+  </div>
+</aside>
+
+<div class="main">
+  <header class="ph">
+    <div>
+      <div class="ph-title">지점 목록</div>
+      <div class="ph-sub">전체 38개 지점</div>
+    </div>
+    <button class="btn btp" onclick="openAdd()">
+      <svg width="13" height="13" fill="none" viewBox="0 0 14 14"><path d="M7 1v12M1 7h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      지점 추가
+    </button>
+  </header>
+
+  <div class="content">
+    <div style="display:flex;gap:10px;margin-bottom:16px;align-items:center">
+      <div class="sw">
+        <svg width="14" height="14" fill="none" viewBox="0 0 16 16"><circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.4"/><path d="m11 11 3 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+        <input type="text" placeholder="지점명, 점주명 검색">
+      </div>
+      <select style="padding:8px 12px">
+        <option>전체 지역</option>
+        <option>서울</option>
+        <option>경기</option>
+        <option>인천</option>
+        <option>부산</option>
+        <option>대구</option>
+        <option>대전</option>
+        <option>광주</option>
+        <option>울산</option>
+        <option>충북</option>
+        <option>전북</option>
+      </select>
+      <select style="padding:8px 12px">
+        <option>전체 상태</option>
+        <option>운영중</option>
+        <option>점검중</option>
+        <option>폐점</option>
+      </select>
+      <span style="font-size:12px;color:#8C9C7A;margin-left:4px">38개 지점</span>
+    </div>
+
+    <div class="card">
+      <table>
+        <thead><tr>
+          <th>#</th><th>지점명</th><th>지역</th><th>점주명</th><th>이메일</th><th>등록일</th><th>상태</th><th style="text-align:center">관리</th>
+        </tr></thead>
+        <tbody>
+          <tr><td style="color:#8C9C7A;font-size:12px">01</td><td style="font-weight:700">암사역점</td><td style="color:#8C9C7A">서울 강동</td><td>노윤숙</td><td style="color:#5A6A48;font-size:11px">shdbstnr304@naver.com</td><td style="color:#8C9C7A;font-size:12px">2023.09.01</td><td><span class="pill pg">운영중</span></td><td style="text-align:center"><div style="display:flex;gap:6px;justify-content:center"><button class="btg" onclick="openEdit('암사역점')">수정</button><button class="btd">삭제</button></div></td></tr>
+          <tr><td style="color:#8C9C7A;font-size:12px">02</td><td style="font-weight:700">봉천점</td><td style="color:#8C9C7A">서울 관악</td><td>최경진</td><td style="color:#5A6A48;font-size:11px">smileckj@naver.com</td><td style="color:#8C9C7A;font-size:12px">2023.10.15</td><td><span class="pill pg">운영중</span></td><td style="text-align:center"><div style="display:flex;gap:6px;justify-content:center"><button class="btg" onclick="openEdit('봉천점')">수정</button><button class="btd">삭제</button></div></td></tr>
+          <tr><td style="color:#8C9C7A;font-size:12px">03</td><td style="font-weight:700">다산점</td><td style="color:#8C9C7A">경기 남양주</td><td>박소영</td><td style="color:#5A6A48;font-size:11px">anding_ds@naver.com</td><td style="color:#8C9C7A;font-size:12px">2023.11.01</td><td><span class="pill pg">운영중</span></td><td style="text-align:center"><div style="display:flex;gap:6px;justify-content:center"><button class="btg" onclick="openEdit('다산점')">수정</button><button class="btd">삭제</button></div></td></tr>
+          <tr><td style="color:#8C9C7A;font-size:12px">04</td><td style="font-weight:700">자양점</td><td style="color:#8C9C7A">서울 광진</td><td>최기선</td><td style="color:#5A6A48;font-size:11px">ending_v1@naver.com</td><td style="color:#8C9C7A;font-size:12px">2023.12.10</td><td><span class="pill pg">운영중</span></td><td style="text-align:center"><div style="display:flex;gap:6px;justify-content:center"><button class="btg" onclick="openEdit('자양점')">수정</button><button class="btd">삭제</button></div></td></tr>
+          <tr><td style="color:#8C9C7A;font-size:12px">05</td><td style="font-weight:700">북가좌점/오목교역점</td><td style="color:#8C9C7A">서울 서대문</td><td>안소희</td><td style="color:#5A6A48;font-size:11px">ending_v1@naver.com</td><td style="color:#8C9C7A;font-size:12px">2024.01.15</td><td><span class="pill pg">운영중</span></td><td style="text-align:center"><div style="display:flex;gap:6px;justify-content:center"><button class="btg" onclick="openEdit('북가좌점/오목교역점')">수정</button><button class="btd">삭제</button></div></td></tr>
+          <tr><td style="color:#8C9C7A;font-size:12px">06</td><td style="font-weight:700">하대원점</td><td style="color:#8C9C7A">경기 성남</td><td>김의진</td><td style="color:#5A6A48;font-size:11px">anding-hdw@naver.com</td><td style="color:#8C9C7A;font-size:12px">2024.02.20</td><td><span class="pill pg">운영중</span></td><td style="text-align:center"><div style="display:flex;gap:6px;justify-content:center"><button class="btg" onclick="openEdit('하대원점')">수정</button><button class="btd">삭제</button></div></td></tr>
+          <tr><td style="color:#8C9C7A;font-size:12px">07</td><td style="font-weight:700">종암점</td><td style="color:#8C9C7A">서울 성북</td><td>김선미</td><td style="color:#5A6A48;font-size:11px">ssunkil@naver.com</td><td style="color:#8C9C7A;font-size:12px">2024.03.01</td><td><span class="pill pg">운영중</span></td><td style="text-align:center"><div style="display:flex;gap:6px;justify-content:center"><button class="btg" onclick="openEdit('종암점')">수정</button><button class="btd">삭제</button></div></td></tr>
+          <tr><td style="color:#8C9C7A;font-size:12px">08</td><td style="font-weight:700">인천완정역점</td><td style="color:#8C9C7A">인천 서구</td><td>박철우</td><td style="color:#5A6A48;font-size:11px">pcwtk@naver.com</td><td style="color:#8C9C7A;font-size:12px">2024.04.10</td><td><span class="pill pg">운영중</span></td><td style="text-align:center"><div style="display:flex;gap:6px;justify-content:center"><button class="btg" onclick="openEdit('인천완정역점')">수정</button><button class="btd">삭제</button></div></td></tr>
+          <tr><td style="color:#8C9C7A;font-size:12px">09</td><td style="font-weight:700">오금점</td><td style="color:#8C9C7A">서울 송파</td><td>이형분</td><td style="color:#5A6A48;font-size:11px">anding_ogold2@naver.com</td><td style="color:#8C9C7A;font-size:12px">2024.05.01</td><td><span class="pill pg">운영중</span></td><td style="text-align:center"><div style="display:flex;gap:6px;justify-content:center"><button class="btg" onclick="openEdit('오금점')">수정</button><button class="btd">삭제</button></div></td></tr>
+          <tr><td style="color:#8C9C7A;font-size:12px">10</td><td style="font-weight:700">냉천점</td><td style="color:#8C9C7A">경기 이천</td><td>임효빈</td><td style="color:#5A6A48;font-size:11px">anding300@naver.com</td><td style="color:#8C9C7A;font-size:12px">2024.05.20</td><td><span class="pill pg">운영중</span></td><td style="text-align:center"><div style="display:flex;gap:6px;justify-content:center"><button class="btg" onclick="openEdit('냉천점')">수정</button><button class="btd">삭제</button></div></td></tr>
+          <tr><td style="color:#8C9C7A;font-size:12px">11</td><td style="font-weight:700">광명하안점</td><td style="color:#8C9C7A">경기 광명</td><td>한혜민</td><td style="color:#5A6A48;font-size:11px">anding_haan@naver.com</td><td style="color:#8C9C7A;font-size:12px">2024.06.15</td><td><span class="pill pg">운영중</span></td><td style="text-align:center"><div style="display:flex;gap:6px;justify-content:center"><button class="btg" onclick="openEdit('광명하안점')">수정</button><button class="btd">삭제</button></div></td></tr>
+          <tr><td style="color:#8C9C7A;font-size:12px">12</td><td style="font-weight:700">수원정자점</td><td style="color:#8C9C7A">경기 수원</td><td>조경미</td><td style="color:#5A6A48;font-size:11px">anding_suwon01@naver.com</td><td style="color:#8C9C7A;font-size:12px">2024.07.01</td><td><span class="pill pg">운영중</span></td><td style="text-align:center"><div style="display:flex;gap:6px;justify-content:center"><button class="btg" onclick="openEdit('수원정자점')">수정</button><button class="btd">삭제</button></div></td></tr>
+          <tr><td style="color:#8C9C7A;font-size:12px">13</td><td style="font-weight:700">천안불당점</td><td style="color:#8C9C7A">충남 천안</td><td>정상대</td><td style="color:#5A6A48;font-size:11px">anding_buldang@naver.com</td><td style="color:#8C9C7A;font-size:12px">2024.07.20</td><td><span class="pill pg">운영중</span></td><td style="text-align:center"><div style="display:flex;gap:6px;justify-content:center"><button class="btg" onclick="openEdit('천안불당점')">수정</button><button class="btd">삭제</button></div></td></tr>
+          <tr><td style="color:#8C9C7A;font-size:12px">14</td><td style="font-weight:700">성남야탑점</td><td style="color:#8C9C7A">경기 성남</td><td>박소영</td><td style="color:#5A6A48;font-size:11px">andingstudycafe@naver.com</td><td style="color:#8C9C7A;font-size:12px">2024.08.10</td><td><span class="pill pg">운영중</span></td><td style="text-align:center"><div style="display:flex;gap:6px;justify-content:center"><button class="btg" onclick="openEdit('성남야탑점')">수정</button><button class="btd">삭제</button></div></td></tr>
+          <tr><td style="color:#8C9C7A;font-size:12px">15</td><td style="font-weight:700">홍제역점</td><td style="color:#8C9C7A">서울 서대문</td><td>박민지</td><td style="color:#5A6A48;font-size:11px">anding_hongjea@naver.com</td><td style="color:#8C9C7A;font-size:12px">2024.09.01</td><td><span class="pill pg">운영중</span></td><td style="text-align:center"><div style="display:flex;gap:6px;justify-content:center"><button class="btg" onclick="openEdit('홍제역점')">수정</button><button class="btd">삭제</button></div></td></tr>
+          <tr><td style="color:#8C9C7A;font-size:12px">16</td><td style="font-weight:700">동탄영천점</td><td style="color:#8C9C7A">경기 화성</td><td>박진경</td><td style="color:#5A6A48;font-size:11px">anding_dtyc@naver.com</td><td style="color:#8C9C7A;font-size:12px">2024.09.25</td><td><span class="pill pg">운영중</span></td><td style="text-align:center"><div style="display:flex;gap:6px;justify-content:center"><button class="btg" onclick="openEdit('동탄영천점')">수정</button><button class="btd">삭제</button></div></td></tr>
+          <tr><td style="color:#8C9C7A;font-size:12px">17</td><td style="font-weight:700">영등포역점</td><td style="color:#8C9C7A">서울 영등포</td><td>원영훈</td><td style="color:#5A6A48;font-size:11px">anding_ydp@naver.com</td><td style="color:#8C9C7A;font-size:12px">2024.10.15</td><td><span class="pill pg">운영중</span></td><td style="text-align:center"><div style="display:flex;gap:6px;justify-content:center"><button class="btg" onclick="openEdit('영등포역점')">수정</button><button class="btd">삭제</button></div></td></tr>
+          <tr><td style="color:#8C9C7A;font-size:12px">18</td><td style="font-weight:700">이수역점</td><td style="color:#8C9C7A">서울 동작</td><td>최윤진</td><td style="color:#5A6A48;font-size:11px">anding_isu@naver.com</td><td style="color:#8C9C7A;font-size:12px">2024.11.01</td><td><span class="pill pg">운영중</span></td><td style="text-align:center"><div style="display:flex;gap:6px;justify-content:center"><button class="btg" onclick="openEdit('이수역점')">수정</button><button class="btd">삭제</button></div></td></tr>
+          <tr><td style="color:#8C9C7A;font-size:12px">19</td><td style="font-weight:700">호평점</td><td style="color:#8C9C7A">경기 남양주</td><td>석정미</td><td style="color:#5A6A48;font-size:11px">anding_hopyeong@naver.com</td><td style="color:#8C9C7A;font-size:12px">2024.11.20</td><td><span class="pill pg">운영중</span></td><td style="text-align:center"><div style="display:flex;gap:6px;justify-content:center"><button class="btg" onclick="openEdit('호평점')">수정</button><button class="btd">삭제</button></div></td></tr>
+          <tr><td style="color:#8C9C7A;font-size:12px">20</td><td style="font-weight:700">산본점</td><td style="color:#8C9C7A">경기 군포</td><td>강한별</td><td style="color:#5A6A48;font-size:11px">anding-sanbon@naver.com</td><td style="color:#8C9C7A;font-size:12px">2024.12.10</td><td><span class="pill pg">운영중</span></td><td style="text-align:center"><div style="display:flex;gap:6px;justify-content:center"><button class="btg" onclick="openEdit('산본점')">수정</button><button class="btd">삭제</button></div></td></tr>
+          <tr><td style="color:#8C9C7A;font-size:12px">21</td><td style="font-weight:700">하남덕풍점</td><td style="color:#8C9C7A">경기 하남</td><td>이수진</td><td style="color:#5A6A48;font-size:11px">anding_deokpung@naver.com</td><td style="color:#8C9C7A;font-size:12px">2025.01.05</td><td><span class="pill pg">운영중</span></td><td style="text-align:center"><div style="display:flex;gap:6px;justify-content:center"><button class="btg" onclick="openEdit('하남덕풍점')">수정</button><button class="btd">삭제</button></div></td></tr>
+          <tr><td style="color:#8C9C7A;font-size:12px">22</td><td style="font-weight:700">거여역점</td><td style="color:#8C9C7A">서울 송파</td><td>정소연</td><td style="color:#5A6A48;font-size:11px">anding_geoyeo@naver.com</td><td style="color:#8C9C7A;font-size:12px">2025.02.01</td><td><span class="pill pg">운영중</span></td><td style="text-align:center"><div style="display:flex;gap:6px;justify-content:center"><button class="btg" onclick="openEdit('거여역점')">수정</button><button class="btd">삭제</button></div></td></tr>
+          <tr><td style="color:#8C9C7A;font-size:12px">23</td><td style="font-weight:700">정릉서경대점</td><td style="color:#8C9C7A">서울 성북</td><td>임서율</td><td style="color:#5A6A48;font-size:11px">anding_seokyeong@naver.com</td><td style="color:#8C9C7A;font-size:12px">2025.02.20</td><td><span class="pill pg">운영중</span></td><td style="text-align:center"><div style="display:flex;gap:6px;justify-content:center"><button class="btg" onclick="openEdit('정릉서경대점')">수정</button><button class="btd">삭제</button></div></td></tr>
+          <tr><td style="color:#8C9C7A;font-size:12px">24</td><td style="font-weight:700">아주대점</td><td style="color:#8C9C7A">경기 수원</td><td>김미경</td><td style="color:#5A6A48;font-size:11px">kokoto76@naver.com</td><td style="color:#8C9C7A;font-size:12px">2025.03.15</td><td><span class="pill pg">운영중</span></td><td style="text-align:center"><div style="display:flex;gap:6px;justify-content:center"><button class="btg" onclick="openEdit('아주대점')">수정</button><button class="btd">삭제</button></div></td></tr>
+          <tr><td style="color:#8C9C7A;font-size:12px">25</td><td style="font-weight:700">개롱역점</td><td style="color:#8C9C7A">서울 강동</td><td>이동진</td><td style="color:#5A6A48;font-size:11px">anding_gaerong@naver.com</td><td style="color:#8C9C7A;font-size:12px">2025.04.01</td><td><span class="pill pg">운영중</span></td><td style="text-align:center"><div style="display:flex;gap:6px;justify-content:center"><button class="btg" onclick="openEdit('개롱역점')">수정</button><button class="btd">삭제</button></div></td></tr>
+          <tr><td style="color:#8C9C7A;font-size:12px">26</td><td style="font-weight:700">개봉역점</td><td style="color:#8C9C7A">서울 구로</td><td>최희진</td><td style="color:#5A6A48;font-size:11px">anding_gaebong@naver.com</td><td style="color:#8C9C7A;font-size:12px">2025.04.20</td><td><span class="pill pg">운영중</span></td><td style="text-align:center"><div style="display:flex;gap:6px;justify-content:center"><button class="btg" onclick="openEdit('개봉역점')">수정</button><button class="btd">삭제</button></div></td></tr>
+          <tr><td style="color:#8C9C7A;font-size:12px">27</td><td style="font-weight:700">홍은점</td><td style="color:#8C9C7A">서울 서대문</td><td>민경언</td><td style="color:#5A6A48;font-size:11px">mbkyrk1992@naver.com</td><td style="color:#8C9C7A;font-size:12px">2025.05.10</td><td><span class="pill pg">운영중</span></td><td style="text-align:center"><div style="display:flex;gap:6px;justify-content:center"><button class="btg" onclick="openEdit('홍은점')">수정</button><button class="btd">삭제</button></div></td></tr>
+          <tr><td style="color:#8C9C7A;font-size:12px">28</td><td style="font-weight:700">상도점</td><td style="color:#8C9C7A">서울 동작</td><td>심미경</td><td style="color:#5A6A48;font-size:11px">anding.mkshim@gmail.com</td><td style="color:#8C9C7A;font-size:12px">2025.06.01</td><td><span class="pill pg">운영중</span></td><td style="text-align:center"><div style="display:flex;gap:6px;justify-content:center"><button class="btg" onclick="openEdit('상도점')">수정</button><button class="btd">삭제</button></div></td></tr>
+          <tr><td style="color:#8C9C7A;font-size:12px">29</td><td style="font-weight:700">개포점</td><td style="color:#8C9C7A">서울 강남</td><td>신진욱</td><td style="color:#5A6A48;font-size:11px">anding_gaepo@naver.com</td><td style="color:#8C9C7A;font-size:12px">2025.06.20</td><td><span class="pill pg">운영중</span></td><td style="text-align:center"><div style="display:flex;gap:6px;justify-content:center"><button class="btg" onclick="openEdit('개포점')">수정</button><button class="btd">삭제</button></div></td></tr>
+          <tr><td style="color:#8C9C7A;font-size:12px">30</td><td style="font-weight:700">화성봉담점</td><td style="color:#8C9C7A">경기 화성</td><td>장희정</td><td style="color:#5A6A48;font-size:11px">andingska@gmail.com</td><td style="color:#8C9C7A;font-size:12px">2025.07.15</td><td><span class="pill pg">운영중</span></td><td style="text-align:center"><div style="display:flex;gap:6px;justify-content:center"><button class="btg" onclick="openEdit('화성봉담점')">수정</button><button class="btd">삭제</button></div></td></tr>
+          <tr><td style="color:#8C9C7A;font-size:12px">31</td><td style="font-weight:700">용인신갈점</td><td style="color:#8C9C7A">경기 용인</td><td>서장원</td><td style="color:#5A6A48;font-size:11px">anding_Singal@naver.com</td><td style="color:#8C9C7A;font-size:12px">2025.08.01</td><td><span class="pill pg">운영중</span></td><td style="text-align:center"><div style="display:flex;gap:6px;justify-content:center"><button class="btg" onclick="openEdit('용인신갈점')">수정</button><button class="btd">삭제</button></div></td></tr>
+          <tr><td style="color:#8C9C7A;font-size:12px">32</td><td style="font-weight:700">수원영통점</td><td style="color:#8C9C7A">경기 수원</td><td>한수경</td><td style="color:#5A6A48;font-size:11px">rnrdj_001@naver.com</td><td style="color:#8C9C7A;font-size:12px">2025.09.10</td><td><span class="pill pg">운영중</span></td><td style="text-align:center"><div style="display:flex;gap:6px;justify-content:center"><button class="btg" onclick="openEdit('수원영통점')">수정</button><button class="btd">삭제</button></div></td></tr>
+          <tr><td style="color:#8C9C7A;font-size:12px">33</td><td style="font-weight:700">잠실학원사거리점</td><td style="color:#8C9C7A">서울 송파</td><td>백연선</td><td style="color:#5A6A48;font-size:11px">andingstudy_jamsil@naver.com</td><td style="color:#8C9C7A;font-size:12px">2025.10.01</td><td><span class="pill pg">운영중</span></td><td style="text-align:center"><div style="display:flex;gap:6px;justify-content:center"><button class="btg" onclick="openEdit('잠실학원사거리점')">수정</button><button class="btd">삭제</button></div></td></tr>
+          <tr><td style="color:#8C9C7A;font-size:12px">34</td><td style="font-weight:700">광명철산점/오류동역점</td><td style="color:#8C9C7A">경기 광명</td><td>구본경</td><td style="color:#5A6A48;font-size:11px">9qhsrud@naver.com</td><td style="color:#8C9C7A;font-size:12px">2025.11.05</td><td><span class="pill pg">운영중</span></td><td style="text-align:center"><div style="display:flex;gap:6px;justify-content:center"><button class="btg" onclick="openEdit('광명철산점/오류동역점')">수정</button><button class="btd">삭제</button></div></td></tr>
+          <tr><td style="color:#8C9C7A;font-size:12px">35</td><td style="font-weight:700">강남구청역점</td><td style="color:#8C9C7A">서울 강남</td><td>이재인</td><td style="color:#5A6A48;font-size:11px">anding_gangnam@naver.com</td><td style="color:#8C9C7A;font-size:12px">2025.12.01</td><td><span class="pill pg">운영중</span></td><td style="text-align:center"><div style="display:flex;gap:6px;justify-content:center"><button class="btg" onclick="openEdit('강남구청역점')">수정</button><button class="btd">삭제</button></div></td></tr>
+          <tr><td style="color:#8C9C7A;font-size:12px">36</td><td style="font-weight:700">부산하단역점</td><td style="color:#8C9C7A">부산 사하</td><td>김채주</td><td style="color:#5A6A48;font-size:11px">k_1205cj@naver.com</td><td style="color:#8C9C7A;font-size:12px">2026.01.15</td><td><span class="pill pg">운영중</span></td><td style="text-align:center"><div style="display:flex;gap:6px;justify-content:center"><button class="btg" onclick="openEdit('부산하단역점')">수정</button><button class="btd">삭제</button></div></td></tr>
+          <tr><td style="color:#8C9C7A;font-size:12px">37</td><td style="font-weight:700">용인동백역점</td><td style="color:#8C9C7A">경기 용인</td><td>강주연</td><td style="color:#5A6A48;font-size:11px">iamsmogi@gmail.com</td><td style="color:#8C9C7A;font-size:12px">2026.03.01</td><td><span class="pill pw">점검중</span></td><td style="text-align:center"><div style="display:flex;gap:6px;justify-content:center"><button class="btg" onclick="openEdit('용인동백역점')">수정</button><button class="btd">삭제</button></div></td></tr>
+          <tr><td style="color:#8C9C7A;font-size:12px">38</td><td style="font-weight:700">강일동점</td><td style="color:#8C9C7A">서울 강동</td><td>전보미</td><td style="color:#5A6A48;font-size:11px">jbm3112@naver.com</td><td style="color:#8C9C7A;font-size:12px">2026.05.20</td><td><span class="pill pb">신규</span></td><td style="text-align:center"><div style="display:flex;gap:6px;justify-content:center"><button class="btg" onclick="openEdit('강일동점')">수정</button><button class="btd">삭제</button></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- 지점 추가/수정 모달 -->
+<div id="addModal" class="overlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <h3 id="modalTitle">지점 추가</h3>
+    <div class="frow">
+      <div class="frow-2">
+        <div class="fitem">
+          <label>지점명 *</label>
+          <input type="text" id="branchName" placeholder="예: 강남구청역점">
+        </div>
+        <div class="fitem">
+          <label>지역 *</label>
+          <select id="branchRegion" style="width:100%">
+            <option value="">지역 선택</option>
+            <option>서울 강남</option><option>서울 서대문</option><option>서울 마포</option><option>서울 성동</option>
+            <option>서울 구로</option><option>서울 종로</option><option>경기 수원</option><option>경기 성남</option>
+            <option>경기 고양</option><option>인천 남동</option><option>부산 부산진</option><option>대구 중구</option>
+            <option>대전 서구</option><option>광주 서구</option><option>울산 남구</option><option>충북 청주</option>
+            <option>전북 전주</option>
+          </select>
+        </div>
+      </div>
+      <div class="frow-2">
+        <div class="fitem">
+          <label>점주명 *</label>
+          <input type="text" id="ownerName" placeholder="점주 성함">
+        </div>
+        <div class="fitem">
+          <label>연락처 *</label>
+          <input type="text" id="ownerPhone" placeholder="010-0000-0000">
+        </div>
+      </div>
+      <div class="fitem">
+        <label>주소</label>
+        <input type="text" id="branchAddr" placeholder="상세 주소 입력">
+      </div>
+      <div class="fitem">
+        <label>메모</label>
+        <textarea id="branchNote" placeholder="특이사항이나 참고 내용을 입력하세요"></textarea>
+      </div>
+    </div>
+    <div style="background:#F0F5E8;border-radius:10px;padding:12px 14px;margin-bottom:20px">
+      <div style="font-size:12px;color:#5A6A48;font-weight:600">💡 지점 추가 시 점주 계정은 <a href="mockup-hq-계정관리.html" style="color:#253016;font-weight:800">점주 계정 관리</a>에서 별도로 생성해주세요.</div>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button class="btg btn" onclick="closeModal()" style="padding:9px 18px;font-size:13px">취소</button>
+      <button class="btn btp" onclick="saveModal()">저장</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function openAdd(){
+  document.getElementById('modalTitle').textContent='지점 추가';
+  document.getElementById('branchName').value='';
+  document.getElementById('branchRegion').value='';
+  document.getElementById('ownerName').value='';
+  document.getElementById('ownerPhone').value='';
+  document.getElementById('branchAddr').value='';
+  document.getElementById('branchNote').value='';
+  const m=document.getElementById('addModal');
+  m.style.display='flex';m.style.alignItems='center';m.style.justifyContent='center';
+}
+function openEdit(name){
+  document.getElementById('modalTitle').textContent='지점 수정 — '+name;
+  document.getElementById('branchName').value=name;
+  document.getElementById('branchRegion').value='서울 강남';
+  document.getElementById('ownerName').value='홍길동';
+  document.getElementById('ownerPhone').value='010-1234-5678';
+  document.getElementById('branchAddr').value='서울시 강남구 구청로 123';
+  const m=document.getElementById('addModal');
+  m.style.display='flex';m.style.alignItems='center';m.style.justifyContent='center';
+}
+function closeModal(){document.getElementById('addModal').style.display='none'}
+function saveModal(){alert('저장되었습니다.');closeModal();}
+</script>
+</body>
+</html>

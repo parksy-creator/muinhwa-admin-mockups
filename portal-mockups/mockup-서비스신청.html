@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>앤딩 오너 — 서비스 신청</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+  *, *::before, *::after { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body { font-family: 'Pretendard', sans-serif; background: #CDD6C2; min-height: 100vh; display: flex; justify-content: center; padding: 32px 0; }
+  .phone { width: 375px; background: #E8EDE1; min-height: 100vh; position: relative; box-shadow: 0 20px 70px rgba(0,0,0,0.22); }
+
+  .svc-card { background: #fff; border-radius: 12px; padding: 9px 10px; box-shadow: 0 1px 2px rgba(30,40,18,0.05), 0 4px 14px rgba(30,40,18,0.07); cursor: pointer; border: 2px solid transparent; transition: all 0.15s; display: flex; flex-direction: row; align-items: center; gap: 8px; }
+  .svc-card.active { border-color: #22c55e; background: #f0fdf4; }
+
+  .form-section { display: none; }
+  .form-section.visible { display: block; }
+
+  .form-card { background: #fff; border-radius: 14px; padding: 13px 14px; box-shadow: 0 1px 2px rgba(30,40,18,0.05), 0 4px 14px rgba(30,40,18,0.07); }
+
+  .form-group { display: flex; flex-direction: column; gap: 4px; margin-bottom: 10px; }
+  .form-label { font-size: 12px; font-weight: 700; color: #1A2012; }
+  .req { color: #ef4444; margin-left: 2px; }
+  .opt { font-size: 10px; color: #8C9C7A; font-weight: 400; margin-left: 4px; }
+
+  .f-input { width: 100%; background: #F7F9F4; border: 1.5px solid #D8E0CF; border-radius: 10px; padding: 8px 11px; font-size: 13px; color: #1A2012; font-family: 'Pretendard', sans-serif; outline: none; transition: border-color 0.15s; }
+  .f-input:focus { border-color: #22c55e; background: #fff; }
+  .f-select { width: 100%; background: #F7F9F4 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='7' viewBox='0 0 12 7'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238C9C7A' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right 12px center; border: 1.5px solid #D8E0CF; border-radius: 10px; padding: 8px 32px 8px 11px; font-size: 13px; color: #1A2012; font-family: 'Pretendard', sans-serif; outline: none; appearance: none; cursor: pointer; transition: border-color 0.15s; }
+  .f-select:focus { border-color: #22c55e; background-color: #fff; }
+  .f-textarea { width: 100%; background: #F7F9F4; border: 1.5px solid #D8E0CF; border-radius: 10px; padding: 8px 11px; font-size: 13px; color: #1A2012; font-family: 'Pretendard', sans-serif; outline: none; resize: none; line-height: 1.65; transition: border-color 0.15s; }
+  .f-textarea:focus { border-color: #22c55e; background: #fff; }
+
+  .radio-row { display: flex; gap: 7px; }
+  .radio-item { flex: 1; display: flex; align-items: center; gap: 6px; background: #F0F4EC; border-radius: 10px; padding: 7px 9px; cursor: pointer; border: 1.5px solid transparent; transition: all 0.15s; }
+  .radio-item:has(input:checked) { background: #f0fdf4; border-color: #22c55e; }
+  .radio-item input { accent-color: #22c55e; }
+  .radio-item span { font-size: 12px; font-weight: 600; color: #1A2012; }
+
+  .file-label { display: flex; align-items: center; gap: 8px; background: #F7F9F4; border: 1.5px dashed #B8C9A8; border-radius: 10px; padding: 9px 11px; cursor: pointer; }
+  .file-label span.txt { font-size: 12px; color: #5A6A48; }
+
+  .notice-box { background: #F0F4EC; border-radius: 10px; padding: 8px 11px; margin-bottom: 10px; }
+  .notice-box p { font-size: 10px; color: #5A6A48; line-height: 1.7; }
+
+  .submit-btn { width: 100%; background: #253016; color: #4ade80; font-size: 14px; font-weight: 800; padding: 12px; border-radius: 13px; border: none; cursor: pointer; letter-spacing: -0.2px; transition: opacity 0.15s; }
+  .submit-btn:active { opacity: 0.85; }
+
+  .tab-bar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 375px; background: rgba(255,255,255,0.93); backdrop-filter: blur(16px); border-top: 1px solid rgba(0,0,0,0.06); display: flex; z-index: 50; }
+  .tab-item { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 10px 0 9px; gap: 3px; text-decoration: none; }
+</style>
+</head>
+<body>
+<div class="phone pb-28">
+
+  <!-- 헤더 -->
+  <div style="background:#253016;padding:13px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:40">
+    <div style="display:flex;align-items:center;gap:10px">
+      <a href="mockup-내매장점검.html" style="color:rgba(255,255,255,0.55);font-size:20px;line-height:1;text-decoration:none;padding-right:2px">‹</a>
+      <span style="color:white;font-size:16px;font-weight:700;letter-spacing:-0.3px">서비스 신청</span>
+    </div>
+    <span style="color:#E4FD97;font-size:12px;font-weight:700">강남구청역점</span>
+  </div>
+
+  <div style="padding:10px 14px 0;display:flex;flex-direction:column;gap:8px">
+
+    <!-- 서비스 선택 카드 -->
+    <div>
+      <p style="font-size:11px;font-weight:700;color:#5A6A48;letter-spacing:0.5px;margin-bottom:7px">신청할 서비스를 선택하세요</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+
+        <div class="svc-card active" onclick="selectService(this,'receipt')">
+          <div style="width:26px;height:26px;background:#DCFCE7;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0">🧾</div>
+          <div>
+            <p style="font-size:11px;font-weight:800;color:#1A2012">영수증 후기</p>
+            <p style="font-size:9px;color:#8C9C7A;margin-top:1px">개당 3,000원 · 최소 30개</p>
+          </div>
+        </div>
+
+        <div class="svc-card" onclick="selectService(this,'blog')">
+          <div style="width:26px;height:26px;background:#DBEAFE;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0">📝</div>
+          <div>
+            <p style="font-size:11px;font-weight:800;color:#1A2012">블로그 리뷰</p>
+            <p style="font-size:9px;color:#8C9C7A;margin-top:1px">개당 15,000원 · 최소 10개</p>
+          </div>
+        </div>
+
+        <div class="svc-card" onclick="selectService(this,'flyer')">
+          <div style="width:26px;height:26px;background:#FFEDD5;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0">🎨</div>
+          <div>
+            <p style="font-size:11px;font-weight:800;color:#1A2012">전단지·배너</p>
+            <p style="font-size:9px;color:#8C9C7A;margin-top:1px">디자인&인쇄 신청</p>
+          </div>
+        </div>
+
+        <div class="svc-card" onclick="selectService(this,'web')">
+          <div style="width:26px;height:26px;background:#EDE9FE;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0">💻</div>
+          <div>
+            <p style="font-size:11px;font-weight:800;color:#1A2012">웹이벤트</p>
+            <p style="font-size:9px;color:#8C9C7A;margin-top:1px">디자인&인쇄 신청</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- 기간 안내 -->
+    <div style="display:flex;align-items:center;gap:7px;background:#FFF8E1;border-radius:10px;padding:9px 12px;border-left:3px solid #fbbf24">
+      <span style="font-size:14px">⏱</span>
+      <p style="font-size:11px;color:#7A5F10;line-height:1.5">제작 및 배송까지 <strong>최소 10일</strong>이 소요됩니다. 미리 신청해 주세요.</p>
+    </div>
+
+    <!-- 공통 정보 -->
+    <div class="form-card">
+      <p style="font-size:12px;font-weight:800;color:#1A2012;margin-bottom:12px">기본 정보</p>
+
+      <div class="form-group">
+        <label class="form-label">세금계산서 이메일<span class="req">*</span></label>
+        <input type="email" class="f-input" placeholder="세금계산서 수신 이메일 주소를 입력해 주세요">
+      </div>
+
+      <div class="form-group" style="margin-bottom:0">
+        <label class="form-label">사업자등록증<span class="req">*</span></label>
+        <label class="file-label">
+          <span style="font-size:16px">📎</span>
+          <span class="txt">사업자등록증 파일 첨부 (jpg, png, pdf)</span>
+          <input type="file" accept="image/*,.pdf" style="display:none">
+        </label>
+      </div>
+    </div>
+
+    <!-- 영수증 후기 폼 -->
+    <div id="form-receipt" class="form-section visible">
+      <div class="form-card">
+        <p style="font-size:13px;font-weight:800;color:#1A2012;margin-bottom:16px">🧾 영수증 후기 신청</p>
+
+        <div class="form-group">
+          <label class="form-label">신청 수량<span class="req">*</span></label>
+          <select class="f-select">
+            <option value="">수량 선택</option>
+            <option>30개 — 90,000원</option>
+            <option>50개 — 150,000원</option>
+            <option>100개 — 300,000원</option>
+            <option>직접 입력</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">신청 양식<span class="req">*</span></label>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <!-- Step 1 -->
+            <div style="display:flex;align-items:center;gap:10px;background:#F7F9F4;border-radius:10px;padding:10px 12px;border:1.5px solid #D8E0CF">
+              <div style="width:22px;height:22px;background:#253016;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#E4FD97;flex-shrink:0">1</div>
+              <div style="flex:1">
+                <p style="font-size:11px;font-weight:700;color:#1A2012">양식 다운로드 후 작성</p>
+                <p style="font-size:10px;color:#8C9C7A;margin-top:1px">영수증 후기 신청 양식 (엑셀)</p>
+              </div>
+              <a href="#" style="background:#4ade80;color:#1A2012;font-size:10px;font-weight:800;padding:5px 10px;border-radius:8px;text-decoration:none;flex-shrink:0">다운로드</a>
+            </div>
+            <!-- Step 2 -->
+            <div style="display:flex;align-items:center;gap:10px;background:#F7F9F4;border-radius:10px;padding:10px 12px;border:1.5px solid #D8E0CF">
+              <div style="width:22px;height:22px;background:#253016;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#E4FD97;flex-shrink:0">2</div>
+              <div style="flex:1">
+                <p style="font-size:11px;font-weight:700;color:#1A2012">구글 드라이브 내 지점 폴더에 업로드</p>
+                <p style="font-size:10px;color:#8C9C7A;margin-top:1px">공유 드라이브 → 강남구청역점 폴더</p>
+              </div>
+              <a href="#" style="background:#4285F4;color:#fff;font-size:10px;font-weight:800;padding:5px 10px;border-radius:8px;text-decoration:none;flex-shrink:0">바로가기</a>
+            </div>
+            <div style="background:#FFF8E1;border-radius:8px;padding:8px 10px;border-left:3px solid #fbbf24">
+              <p style="font-size:10px;color:#7A5F10;line-height:1.6">📂 드라이브 접속 후 내 지점명으로 폴더를 직접 만들어 업로드해 주세요.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">요청사항<span class="opt">(선택)</span></label>
+          <textarea class="f-textarea" rows="3" placeholder="강조할 키워드나 특별 요청사항을 적어주세요"></textarea>
+        </div>
+
+        <div class="notice-box">
+          <p>입금까지 하셔야 신청이 완료됩니다.</p>
+        </div>
+
+        <button class="submit-btn" onclick="submitForm()">신청하기</button>
+      </div>
+    </div>
+
+    <!-- 블로그 리뷰 폼 -->
+    <div id="form-blog" class="form-section">
+      <div class="form-card">
+        <p style="font-size:13px;font-weight:800;color:#1A2012;margin-bottom:16px">📝 블로그 리뷰 신청</p>
+
+        <div class="form-group">
+          <label class="form-label">신청 수량<span class="req">*</span></label>
+          <select class="f-select">
+            <option value="">수량 선택</option>
+            <option>10개 — 150,000원</option>
+            <option>20개 — 300,000원</option>
+            <option>30개 — 450,000원</option>
+            <option>직접 입력</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">신청 양식<span class="req">*</span></label>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <!-- Step 1 -->
+            <div style="display:flex;align-items:center;gap:10px;background:#F7F9F4;border-radius:10px;padding:10px 12px;border:1.5px solid #D8E0CF">
+              <div style="width:22px;height:22px;background:#253016;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#E4FD97;flex-shrink:0">1</div>
+              <div style="flex:1">
+                <p style="font-size:11px;font-weight:700;color:#1A2012">양식 다운로드 후 작성</p>
+                <p style="font-size:10px;color:#8C9C7A;margin-top:1px">블로그 리뷰 신청 양식 (엑셀)</p>
+              </div>
+              <a href="#" style="background:#4ade80;color:#1A2012;font-size:10px;font-weight:800;padding:5px 10px;border-radius:8px;text-decoration:none;flex-shrink:0">다운로드</a>
+            </div>
+            <!-- Step 2 -->
+            <div style="display:flex;align-items:center;gap:10px;background:#F7F9F4;border-radius:10px;padding:10px 12px;border:1.5px solid #D8E0CF">
+              <div style="width:22px;height:22px;background:#253016;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#E4FD97;flex-shrink:0">2</div>
+              <div style="flex:1">
+                <p style="font-size:11px;font-weight:700;color:#1A2012">구글 드라이브 내 지점 폴더에 업로드</p>
+                <p style="font-size:10px;color:#8C9C7A;margin-top:1px">공유 드라이브 → 강남구청역점 폴더</p>
+              </div>
+              <a href="#" style="background:#4285F4;color:#fff;font-size:10px;font-weight:800;padding:5px 10px;border-radius:8px;text-decoration:none;flex-shrink:0">바로가기</a>
+            </div>
+            <div style="background:#FFF8E1;border-radius:8px;padding:8px 10px;border-left:3px solid #fbbf24">
+              <p style="font-size:10px;color:#7A5F10;line-height:1.6">📂 드라이브 접속 후 내 지점명으로 폴더를 직접 만들어 업로드해 주세요.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">원고 방향<span class="opt">(선택)</span></label>
+          <textarea class="f-textarea" rows="3" placeholder="강조하고 싶은 내용이나 분위기를 적어주세요&#10;예: 조용한 분위기, 1인 좌석 위주, 청결함 강조"></textarea>
+        </div>
+
+        <div class="notice-box">
+          <p>입금까지 하셔야 신청이 완료됩니다.</p>
+        </div>
+
+        <button class="submit-btn" onclick="submitForm()">신청하기</button>
+      </div>
+    </div>
+
+    <!-- 전단지·배너 폼 -->
+    <div id="form-flyer" class="form-section">
+      <div class="form-card">
+        <p style="font-size:13px;font-weight:800;color:#1A2012;margin-bottom:16px">🎨 전단지·배너 디자인&인쇄 신청</p>
+
+        <div class="form-group">
+          <label class="form-label">디자인 종류<span class="req">*</span></label>
+          <div class="radio-row">
+            <label class="radio-item"><input type="radio" name="flyer-type" value="flyer"><span>전단지</span></label>
+            <label class="radio-item"><input type="radio" name="flyer-type" value="banner"><span>배너</span></label>
+            <label class="radio-item"><input type="radio" name="flyer-type" value="both"><span>둘 다</span></label>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">사이즈·규격<span class="req">*</span></label>
+          <select class="f-select">
+            <option value="">사이즈 선택</option>
+            <option>전단지 — A4 세로</option>
+            <option>전단지 — A4 가로</option>
+            <option>전단지 — A3 세로</option>
+            <option>전단지 — A3 가로</option>
+            <option>배너 — 600×180cm</option>
+            <option>배너 — 500×150cm</option>
+            <option>직접 입력</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">컨셉·분위기<span class="req">*</span></label>
+          <textarea class="f-textarea" rows="3" placeholder="원하는 디자인 방향을 적어주세요&#10;예: 깔끔한 미니멀, 여름 시즌 느낌, 고급스러운 톤"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">레퍼런스 이미지<span class="opt">(선택)</span></label>
+          <label class="file-label">
+            <span style="font-size:16px">📎</span>
+            <span class="txt">이미지 파일 첨부 (jpg, png)</span>
+            <input type="file" accept="image/*" style="display:none">
+          </label>
+        </div>
+
+        <button class="submit-btn" onclick="submitForm()">신청하기</button>
+      </div>
+    </div>
+
+    <!-- 웹이벤트 폼 -->
+    <div id="form-web" class="form-section">
+      <div class="form-card">
+        <p style="font-size:13px;font-weight:800;color:#1A2012;margin-bottom:16px">💻 웹이벤트 디자인&인쇄 신청</p>
+
+        <div class="form-group">
+          <label class="form-label">이벤트명<span class="req">*</span></label>
+          <input type="text" class="f-input" placeholder="예: 7월 여름 특별 이벤트">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">이벤트 기간<span class="req">*</span></label>
+          <div style="display:flex;align-items:center;gap:7px">
+            <input type="date" class="f-input" style="flex:1">
+            <span style="font-size:11px;color:#8C9C7A;flex-shrink:0">~</span>
+            <input type="date" class="f-input" style="flex:1">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">이벤트 내용·컨셉<span class="req">*</span></label>
+          <textarea class="f-textarea" rows="4" placeholder="이벤트 내용, 혜택, 원하는 분위기를 적어주세요"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">레퍼런스 이미지<span class="opt">(선택)</span></label>
+          <label class="file-label">
+            <span style="font-size:16px">📎</span>
+            <span class="txt">이미지 파일 첨부 (jpg, png)</span>
+            <input type="file" accept="image/*" style="display:none">
+          </label>
+        </div>
+
+        <button class="submit-btn" onclick="submitForm()">신청하기</button>
+      </div>
+    </div>
+
+    <!-- 안내 -->
+    <div style="background:#D8E0CF;border-radius:12px;padding:11px 14px;margin-bottom:4px">
+      <p style="font-size:10px;font-weight:700;color:#1A2012;margin-bottom:5px">입금 안내</p>
+      <div style="background:#fff;border-radius:8px;padding:9px 11px;margin-bottom:8px">
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <p style="font-size:11px;font-weight:800;color:#1A2012">하나은행 553-910009-62604</p>
+          <p style="font-size:10px;color:#5A6A48;flex-shrink:0;margin-left:8px">예금주: 무인화연구소</p>
+        </div>
+        <p style="font-size:10px;color:#ef4444;margin-top:4px;font-weight:600">※ 표시 금액은 부가세 별도입니다. 부가세 포함 금액으로 입금해 주세요.</p>
+      </div>
+      <p style="font-size:10px;color:#5A6A48;line-height:1.7">평일 기준 1~2일 내 회신합니다.</p>
+    </div>
+
+  </div>
+
+  <!-- 하단 탭바 -->
+  <div class="tab-bar">
+    <a href="mockup-홈-v2.html" class="tab-item">
+      <div style="height:3px;margin-bottom:2px"></div>
+      <span style="font-size:18px">🏠</span>
+      <span style="font-size:9.5px;font-weight:500;color:#8C9C7A">홈</span>
+    </a>
+    <a href="mockup-공지목록.html" class="tab-item">
+      <div style="height:3px;margin-bottom:2px"></div>
+      <span style="font-size:18px">📢</span>
+      <span style="font-size:9.5px;font-weight:500;color:#8C9C7A">공지</span>
+    </a>
+    <a href="mockup-자료실.html" class="tab-item">
+      <div style="height:3px;margin-bottom:2px"></div>
+      <span style="font-size:18px">📁</span>
+      <span style="font-size:9.5px;font-weight:500;color:#8C9C7A">자료실</span>
+    </a>
+    <a href="mockup-문의목록.html" class="tab-item">
+      <div style="height:3px;margin-bottom:2px"></div>
+      <span style="font-size:18px">💬</span>
+      <span style="font-size:9.5px;font-weight:500;color:#8C9C7A">문의</span>
+    </a>
+  </div>
+
+</div>
+
+<script>
+function selectService(el, type) {
+  document.querySelectorAll('.svc-card').forEach(c => c.classList.remove('active'));
+  document.querySelectorAll('.form-section').forEach(f => f.classList.remove('visible'));
+  el.classList.add('active');
+  const form = document.getElementById('form-' + type);
+  form.classList.add('visible');
+  setTimeout(() => form.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
+}
+
+function submitForm() {
+  // 선택된 서비스 확인
+  const serviceNames = { receipt: '영수증 후기', blog: '블로그 리뷰', flyer: '전단지·배너', web: '웹이벤트' };
+  const visibleForm = document.querySelector('.form-section.visible');
+  const serviceType = visibleForm ? visibleForm.id.replace('form-', '') : '';
+  const serviceName = serviceNames[serviceType] || '서비스';
+
+  // 오늘 날짜
+  const t = new Date();
+  const dateStr = `${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,'0')}-${String(t.getDate()).padStart(2,'0')}`;
+
+  // localStorage에 저장 → 문의 목록에서 불러옴
+  const saved = JSON.parse(localStorage.getItem('svc_requests') || '[]');
+  saved.unshift({ title: `[서비스 신청] ${serviceName}`, date: dateStr });
+  localStorage.setItem('svc_requests', JSON.stringify(saved));
+
+  // 완료 모달
+  const overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:999';
+  overlay.innerHTML = `
+    <div style="background:#fff;border-radius:20px;padding:28px 24px;width:300px;text-align:center">
+      <div style="font-size:36px;margin-bottom:12px">✅</div>
+      <p style="font-size:15px;font-weight:800;color:#1A2012;margin-bottom:6px">신청 완료!</p>
+      <p style="font-size:12px;color:#5A6A48;line-height:1.6;margin-bottom:20px">문의 창에서 신청 내역을 확인하세요.</p>
+      <div style="display:flex;gap:8px">
+        <button onclick="this.closest('div[style*=fixed]').remove()" style="flex:1;background:#F0F4EC;color:#5A6A48;font-size:13px;font-weight:700;padding:12px;border-radius:12px;border:none;cursor:pointer">닫기</button>
+        <a href="mockup-문의목록.html" style="flex:1;background:#253016;color:#E4FD97;font-size:13px;font-weight:800;padding:12px;border-radius:12px;text-decoration:none;display:flex;align-items:center;justify-content:center">문의 확인</a>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+}
+</script>
+</body>
+</html>

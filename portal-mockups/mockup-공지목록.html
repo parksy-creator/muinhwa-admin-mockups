@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>앤딩 오너 — 공지</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+  *, *::before, *::after { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body { font-family: 'Pretendard', sans-serif; background: #CDD6C2; min-height: 100vh; display: flex; justify-content: center; padding: 32px 0; }
+  .phone { width: 375px; background: #E8EDE1; min-height: 100vh; position: relative; box-shadow: 0 20px 70px rgba(0,0,0,0.22); overflow: hidden; }
+
+  .notice-card { background: #fff; border-radius: 14px; padding: 12px 14px; box-shadow: 0 1px 2px rgba(30,40,18,0.05), 0 4px 14px rgba(30,40,18,0.07); cursor: pointer; transition: transform 0.1s; }
+  .notice-card:active { transform: scale(0.98); }
+  .pin-card { background: #fff; border-radius: 12px; padding: 11px 13px; cursor: pointer; transition: transform 0.1s; border-left: 3px solid #253016; }
+  .pin-card:active { transform: scale(0.98); }
+
+  .pill { display: inline-flex; align-items: center; padding: 2px 7px; border-radius: 99px; font-size: 10px; font-weight: 700; }
+  .pill-required { background: #FCDEDA; color: #B83A32; }
+  .pill-new { background: #DCFCE7; color: #15803D; }
+
+  .filter-tab { padding: 5px 13px; border-radius: 99px; font-size: 11px; font-weight: 600; cursor: pointer; border: none; font-family: 'Pretendard', sans-serif; transition: all 0.15s; }
+  .filter-tab.active { background: #253016; color: #E4FD97; }
+  .filter-tab:not(.active) { background: #fff; color: #5A6A48; border: 1.5px solid #D8E0CF; }
+
+  .search-wrap { position: relative; }
+  .search-icon { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); font-size: 13px; color: #8C9C7A; }
+  .search-input { width: 100%; background: #fff; border: 1.5px solid #D8E0CF; border-radius: 11px; padding: 9px 12px 9px 33px; font-size: 13px; color: #1A2012; outline: none; font-family: 'Pretendard', sans-serif; }
+  .search-input::placeholder { color: #A8B89C; }
+  .search-input:focus { border-color: #253016; }
+
+  .more-btn { width: 100%; background: #fff; border: 1.5px solid #D8E0CF; border-radius: 12px; padding: 10px; font-size: 12px; font-weight: 700; color: #5A6A48; cursor: pointer; font-family: 'Pretendard', sans-serif; transition: all 0.15s; }
+  .more-btn:hover { background: #F0F4EC; border-color: #B8C9A8; }
+
+  .detail-overlay { display: none; position: fixed; top: 32px; left: 50%; transform: translateX(-50%); width: 375px; height: calc(100vh - 32px); background: #E8EDE1; z-index: 200; overflow-y: auto; }
+  .detail-overlay.open { display: block; }
+
+  .tab-bar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 375px; background: rgba(255,255,255,0.93); backdrop-filter: blur(16px); border-top: 1px solid rgba(0,0,0,0.06); display: flex; z-index: 50; }
+  .tab-item { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 10px 0 9px; gap: 3px; text-decoration: none; }
+</style>
+</head>
+<body>
+<div class="phone" style="padding-bottom:72px">
+
+  <!-- 헤더 -->
+  <div style="background:#253016;padding:13px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:40">
+    <span style="color:white;font-size:16px;font-weight:700;letter-spacing:-0.3px">공지</span>
+    <div style="display:flex;align-items:center;gap:10px">
+      <span style="color:#E4FD97;font-size:12px;font-weight:700">강남구청역점</span>
+      <button onclick="openSettings()" style="width:30px;height:30px;background:rgba(255,255,255,0.1);border-radius:8px;display:flex;align-items:center;justify-content:center;border:none;cursor:pointer">
+        <span style="color:rgba(255,255,255,0.65);font-size:15px">⚙</span>
+      </button>
+    </div>
+  </div>
+
+  <div style="padding:10px 14px 14px;display:flex;flex-direction:column;gap:8px">
+
+    <!-- 검색창 -->
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input class="search-input" placeholder="공지 검색" oninput="onSearch(this.value)">
+    </div>
+
+    <!-- 필터 탭 -->
+    <div style="display:flex;gap:6px">
+      <button class="filter-tab active" onclick="setFilter(this,'전체')">전체</button>
+      <button class="filter-tab" onclick="setFilter(this,'필독')">📌 필독</button>
+      <button class="filter-tab" onclick="setFilter(this,'일반')">일반</button>
+    </div>
+
+    <!-- 고정 공지 -->
+    <div id="pinned-section">
+      <div style="display:flex;align-items:center;gap:5px;margin-bottom:6px">
+        <span style="font-size:10px;font-weight:700;color:#5A6A48">📌 고정 공지</span>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+
+        <div class="pin-card"
+          onclick="openDetail('키오스크 점검 필수 확인사항','2026.07.01','필독','키오스크 정기 점검이 진행됩니다. 점검 당일 오전 6시~8시 사이 키오스크가 일시 중단되오니 회원 안내 부탁드립니다.\n\n■ 점검 일시: 2026년 7월 1일 (화) 오전 6:00 ~ 8:00\n■ 점검 범위: 결제 모듈, 출입 연동, 좌석 현황 동기화\n■ 점검 중 회원 출입: 앱으로만 가능\n\n불편을 드려 죄송합니다.')">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px">
+            <div style="display:flex;align-items:flex-start;gap:7px;flex:1;min-width:0">
+              <span class="pill pill-required" style="flex-shrink:0;margin-top:1px">필독</span>
+              <p style="font-size:12px;font-weight:700;color:#1A2012;line-height:1.5">키오스크 점검 필수 확인사항</p>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0">
+              <div style="width:9px;height:9px;border-radius:50%;background:#22c55e"></div>
+              <span style="font-size:10px;color:#A8B89C">07.01</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="pin-card"
+          onclick="openDetail('점주 포털 이용 가이드','2026.06.01','필독','앤딩 오너 포털 이용 안내입니다.\n\n■ 홈: 매장 현황 요약 및 주요 알림\n■ 공지: 본사 공지사항 확인\n■ 자료실: 운영 매뉴얼 및 양식 다운로드\n■ 문의: 본사 문의 접수 및 답변 확인\n■ 내 매장 점검: 마케팅 점수 및 서비스 신청\n\n궁금한 사항은 문의 게시판 또는 채널톡으로 연락주세요.')">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px">
+            <div style="display:flex;align-items:flex-start;gap:7px;flex:1;min-width:0">
+              <span class="pill pill-required" style="flex-shrink:0;margin-top:1px">필독</span>
+              <p style="font-size:12px;font-weight:700;color:#1A2012;line-height:1.5">점주 포털 이용 가이드</p>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0">
+              <div style="width:9px;height:9px;border-radius:50%;background:#22c55e"></div>
+              <span style="font-size:10px;color:#A8B89C">06.01</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- 구분선 -->
+    <div style="height:1px;background:#D8E0CF;margin:0 2px"></div>
+
+    <!-- 동적 공지 목록 -->
+    <div id="notice-list" style="display:flex;flex-direction:column;gap:7px"></div>
+
+    <!-- 더보기 버튼 -->
+    <button id="more-btn" class="more-btn" onclick="loadMore()" style="display:none">더보기</button>
+
+    <!-- 검색 결과 없음 -->
+    <div id="no-result" style="display:none;text-align:center;padding:32px 0">
+      <p style="font-size:14px;color:#A8B89C">검색 결과가 없습니다.</p>
+    </div>
+
+  </div>
+
+  <!-- 하단 탭바 -->
+  <div class="tab-bar">
+    <a href="mockup-홈-v2.html" class="tab-item">
+      <div style="height:3px;margin-bottom:2px"></div>
+      <span style="font-size:18px">🏠</span>
+      <span style="font-size:9.5px;font-weight:500;color:#8C9C7A">홈</span>
+    </a>
+    <a href="mockup-공지목록.html" class="tab-item">
+      <div style="width:20px;height:3px;border-radius:99px;background:#253016;margin-bottom:2px"></div>
+      <span style="font-size:18px">📢</span>
+      <span style="font-size:9.5px;font-weight:700;color:#4A5E2C">공지</span>
+    </a>
+    <a href="mockup-자료실.html" class="tab-item">
+      <div style="height:3px;margin-bottom:2px"></div>
+      <span style="font-size:18px">📁</span>
+      <span style="font-size:9.5px;font-weight:500;color:#8C9C7A">자료실</span>
+    </a>
+    <a href="mockup-문의목록.html" class="tab-item">
+      <div style="height:3px;margin-bottom:2px"></div>
+      <span style="font-size:18px">💬</span>
+      <span style="font-size:9.5px;font-weight:500;color:#8C9C7A">문의</span>
+    </a>
+  </div>
+
+</div>
+
+<!-- 상세 오버레이 -->
+<div class="detail-overlay" id="detailView">
+  <div style="background:#253016;padding:13px 16px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:10">
+    <button onclick="closeDetail()" style="color:rgba(255,255,255,0.7);font-size:22px;background:none;border:none;cursor:pointer;padding:0;line-height:1;font-family:'Pretendard',sans-serif">‹</button>
+    <span style="color:white;font-size:15px;font-weight:700;flex:1" id="dTitle"></span>
+    <span id="dBadge"></span>
+  </div>
+  <div style="padding:14px 16px;display:flex;flex-direction:column;gap:10px">
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <span style="font-size:11px;color:#8C9C7A" id="dDate"></span>
+      <span style="font-size:11px;color:#A8B89C">본사</span>
+    </div>
+    <div style="background:#fff;border-radius:14px;padding:16px">
+      <p style="font-size:13px;color:#2D3E2C;line-height:1.85;white-space:pre-line" id="dBody"></p>
+    </div>
+    <button onclick="markRead()" id="readBtn" style="width:100%;background:#253016;color:#E4FD97;font-size:13px;font-weight:800;padding:13px;border-radius:13px;border:none;cursor:pointer;font-family:'Pretendard',sans-serif">확인했어요 ✓</button>
+  </div>
+</div>
+
+<!-- 설정 패널 -->
+<div id="settingsModal" style="display:none;position:fixed;top:32px;left:50%;transform:translateX(-50%);width:375px;height:calc(100vh - 32px);background:#E8EDE1;z-index:300;overflow-y:auto;">
+  <div style="background:#253016;padding:13px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10">
+    <button onclick="closeSettings()" style="width:30px;height:30px;background:rgba(255,255,255,0.1);border-radius:8px;display:flex;align-items:center;justify-content:center;border:none;cursor:pointer">
+      <svg width="18" height="18" fill="none" viewBox="0 0 18 18"><path d="M11 4L6 9l5 5" stroke="rgba(255,255,255,0.8)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <span style="color:white;font-size:16px;font-weight:700">설정</span>
+    <div style="width:30px"></div>
+  </div>
+  <div style="padding:16px;display:flex;flex-direction:column;gap:12px">
+    <div>
+      <p style="font-size:11px;font-weight:700;color:#8C9C7A;letter-spacing:0.4px;margin-bottom:8px">회원정보</p>
+      <div style="background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 1px 2px rgba(30,40,18,0.04),0 4px 12px rgba(30,40,18,0.06)">
+        <div style="display:flex;align-items:center;padding:14px 16px;border-bottom:1px solid #F0F4EC">
+          <span style="font-size:12px;color:#8C9C7A;width:72px;flex-shrink:0">지점명</span>
+          <span style="font-size:14px;font-weight:600;color:#1A2012">강남구청역점</span>
+        </div>
+        <div style="display:flex;align-items:center;padding:14px 16px;border-bottom:1px solid #F0F4EC">
+          <span style="font-size:12px;color:#8C9C7A;width:72px;flex-shrink:0">성함</span>
+          <span style="font-size:14px;font-weight:600;color:#1A2012">홍길동</span>
+        </div>
+        <div style="display:flex;align-items:center;padding:14px 16px;border-bottom:1px solid #F0F4EC">
+          <span style="font-size:12px;color:#8C9C7A;width:72px;flex-shrink:0">이메일</span>
+          <span style="font-size:13px;font-weight:600;color:#1A2012">hong@muinlab.io</span>
+        </div>
+        <div style="display:flex;align-items:center;padding:14px 16px">
+          <span style="font-size:12px;color:#8C9C7A;width:72px;flex-shrink:0">비밀번호</span>
+          <span style="font-size:16px;color:#A8B89C;letter-spacing:3px">••••••</span>
+          <span style="flex:1"></span>
+          <button onclick="openPwFromSettings()" style="font-size:12px;color:#253016;font-weight:700;background:#F0F4EC;border:none;border-radius:8px;padding:5px 10px;cursor:pointer;font-family:'Pretendard',sans-serif">변경</button>
+        </div>
+      </div>
+    </div>
+    <button onclick="confirmLogout()" style="width:100%;background:#fff;color:#DC2626;border:1.5px solid #FECACA;border-radius:13px;padding:14px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Pretendard',sans-serif;margin-top:8px">로그아웃</button>
+  </div>
+</div>
+<!-- 로그아웃 확인 -->
+<div id="logoutConfirm" style="display:none;position:fixed;top:0;left:50%;transform:translateX(-50%);width:375px;height:100vh;background:rgba(0,0,0,0.45);z-index:500;align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:20px;padding:24px;margin:0 20px;text-align:center">
+    <p style="font-size:15px;font-weight:800;color:#1A2012;margin-bottom:6px">로그아웃</p>
+    <p style="font-size:13px;color:#5A6A48;line-height:1.6;margin-bottom:20px">정말 로그아웃하시겠습니까?</p>
+    <div style="display:flex;gap:8px">
+      <button onclick="document.getElementById('logoutConfirm').style.display='none'" style="flex:1;background:#F0F4EC;color:#5A6A48;font-size:13px;font-weight:700;padding:12px;border-radius:12px;border:none;cursor:pointer;font-family:'Pretendard',sans-serif">취소</button>
+      <button onclick="doLogout()" style="flex:1;background:#DC2626;color:#fff;font-size:13px;font-weight:700;padding:12px;border-radius:12px;border:none;cursor:pointer;font-family:'Pretendard',sans-serif">로그아웃</button>
+    </div>
+  </div>
+</div>
+<!-- 비밀번호 변경 모달 -->
+<div id="pwModal" style="display:none;position:fixed;top:32px;left:50%;transform:translateX(-50%);width:375px;height:calc(100vh - 32px);background:#E8EDE1;z-index:300;overflow-y:auto;">
+  <div style="background:#253016;padding:13px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10">
+    <button onclick="closePwModal()" style="width:30px;height:30px;background:rgba(255,255,255,0.1);border-radius:8px;display:flex;align-items:center;justify-content:center;border:none;cursor:pointer">
+      <svg width="18" height="18" fill="none" viewBox="0 0 18 18"><path d="M11 4L6 9l5 5" stroke="rgba(255,255,255,0.8)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <span style="color:white;font-size:16px;font-weight:700">비밀번호 변경</span>
+    <div style="width:30px"></div>
+  </div>
+  <div id="pwForm" style="padding:20px 16px;display:flex;flex-direction:column;gap:16px">
+    <div style="background:#FFFBEB;border:1px solid #FDE68A;border-radius:12px;padding:12px 14px;display:flex;gap:10px;align-items:flex-start">
+      <span style="font-size:17px;flex-shrink:0">🔑</span>
+      <div>
+        <p style="font-size:12px;font-weight:700;color:#92400E;margin-bottom:3px">기본 비밀번호를 변경해주세요</p>
+        <p style="font-size:11px;color:#B45309;line-height:1.5">처음 발급받은 기본 비밀번호(123456)는 보안을 위해 꼭 변경해주세요.</p>
+      </div>
+    </div>
+    <div>
+      <label style="font-size:12px;font-weight:700;color:#3A4D28;display:block;margin-bottom:6px">현재 비밀번호</label>
+      <div style="position:relative">
+        <input id="pwCurrent" type="password" placeholder="현재 비밀번호 입력" style="width:100%;background:#fff;border:1.5px solid #D8E0CF;border-radius:11px;padding:11px 52px 11px 14px;font-size:14px;color:#1A2012;outline:none;font-family:'Pretendard',sans-serif" onfocus="this.style.borderColor='#253016'" onblur="this.style.borderColor='#D8E0CF'">
+        <button type="button" onclick="togglePw('pwCurrent',this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#8C9C7A;font-size:12px;font-weight:600;padding:0;font-family:'Pretendard',sans-serif">보기</button>
+      </div>
+    </div>
+    <div>
+      <label style="font-size:12px;font-weight:700;color:#3A4D28;display:block;margin-bottom:6px">새 비밀번호</label>
+      <div style="position:relative">
+        <input id="pwNew" type="password" placeholder="새 비밀번호 (6자 이상)" style="width:100%;background:#fff;border:1.5px solid #D8E0CF;border-radius:11px;padding:11px 52px 11px 14px;font-size:14px;color:#1A2012;outline:none;font-family:'Pretendard',sans-serif" onfocus="this.style.borderColor='#253016'" onblur="this.style.borderColor='#D8E0CF'">
+        <button type="button" onclick="togglePw('pwNew',this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#8C9C7A;font-size:12px;font-weight:600;padding:0;font-family:'Pretendard',sans-serif">보기</button>
+      </div>
+    </div>
+    <div>
+      <label style="font-size:12px;font-weight:700;color:#3A4D28;display:block;margin-bottom:6px">새 비밀번호 확인</label>
+      <div style="position:relative">
+        <input id="pwConfirm" type="password" placeholder="새 비밀번호 재입력" style="width:100%;background:#fff;border:1.5px solid #D8E0CF;border-radius:11px;padding:11px 52px 11px 14px;font-size:14px;color:#1A2012;outline:none;font-family:'Pretendard',sans-serif" onfocus="this.style.borderColor='#253016'" onblur="this.style.borderColor='#D8E0CF'">
+        <button type="button" onclick="togglePw('pwConfirm',this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#8C9C7A;font-size:12px;font-weight:600;padding:0;font-family:'Pretendard',sans-serif">보기</button>
+      </div>
+    </div>
+    <div id="pwError" style="display:none;background:#FEF3F2;border:1px solid #FECACA;border-radius:10px;padding:10px 14px">
+      <p id="pwErrorMsg" style="font-size:12px;color:#DC2626;font-weight:600;margin:0"></p>
+    </div>
+    <button onclick="submitPwChange()" style="background:#253016;color:#E4FD97;border:none;border-radius:13px;padding:14px;font-size:15px;font-weight:700;width:100%;cursor:pointer;font-family:'Pretendard',sans-serif;margin-top:4px">비밀번호 변경</button>
+  </div>
+  <div id="pwSuccess" style="display:none;padding:60px 16px;flex-direction:column;align-items:center;gap:16px;text-align:center">
+    <div style="width:72px;height:72px;background:#DCFCE7;border-radius:50%;display:flex;align-items:center;justify-content:center">
+      <svg width="32" height="32" fill="none" viewBox="0 0 32 32"><path d="M6 16l7 7 13-13" stroke="#16a34a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    <div>
+      <p style="font-size:18px;font-weight:800;color:#1A2012;margin-bottom:8px">비밀번호가 변경되었습니다</p>
+      <p style="font-size:13px;color:#5A6A48;line-height:1.6">다음 로그인부터<br>새 비밀번호를 사용해주세요.</p>
+    </div>
+    <button onclick="closePwModal()" style="background:#253016;color:#E4FD97;border:none;border-radius:13px;padding:13px 32px;font-size:15px;font-weight:700;cursor:pointer;font-family:'Pretendard',sans-serif;margin-top:8px">확인</button>
+  </div>
+</div>
+
+<script>
+function openSettings(){
+  document.getElementById('settingsModal').style.display='block';
+}
+function closeSettings(){
+  document.getElementById('settingsModal').style.display='none';
+}
+function openPwFromSettings(){
+  closeSettings();
+  openPwModal();
+}
+function confirmLogout(){
+  const d=document.getElementById('logoutConfirm');
+  d.style.display='flex';d.style.alignItems='center';d.style.justifyContent='center';
+}
+function doLogout(){
+  document.getElementById('logoutConfirm').style.display='none';
+  alert('로그아웃 되었습니다.');
+}
+function openPwModal(){
+  ['pwCurrent','pwNew','pwConfirm'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('pwError').style.display='none';
+  document.getElementById('pwForm').style.display='flex';
+  document.getElementById('pwSuccess').style.display='none';
+  document.getElementById('pwModal').style.display='block';
+}
+function closePwModal(){ document.getElementById('pwModal').style.display='none'; }
+function togglePw(id,btn){
+  const i=document.getElementById(id);
+  i.type=i.type==='password'?'text':'password';
+  btn.textContent=i.type==='password'?'보기':'숨기기';
+}
+function submitPwChange(){
+  const c=document.getElementById('pwCurrent').value;
+  const n=document.getElementById('pwNew').value;
+  const conf=document.getElementById('pwConfirm').value;
+  const err=document.getElementById('pwError');
+  const msg=document.getElementById('pwErrorMsg');
+  if(!c){msg.textContent='현재 비밀번호를 입력해주세요.';err.style.display='block';return;}
+  if(n.length<6){msg.textContent='새 비밀번호는 6자 이상이어야 합니다.';err.style.display='block';return;}
+  if(n!==conf){msg.textContent='새 비밀번호가 일치하지 않습니다.';err.style.display='block';return;}
+  err.style.display='none';
+  document.getElementById('pwForm').style.display='none';
+  const s=document.getElementById('pwSuccess');
+  s.style.display='flex';s.style.flexDirection='column';s.style.alignItems='center';
+}
+
+const PAGE_SIZE = 4;
+
+const ALL_NOTICES = [
+  { type:'필독', title:'7월 점주 월간 미팅 안내',      date:'07.10', fullDate:'2026.07.10', read:false, isNew:true,
+    body:'7월 점주 월간 미팅을 아래와 같이 안내드립니다.\n\n■ 일시: 2026년 7월 10일 (목) 오후 7시\n■ 방식: Zoom 온라인 미팅\n■ 주요 안건: 여름 성수기 운영 전략 / 마케팅 지원 현황 / 시설 점검 결과 공유\n\nZoom 링크는 미팅 당일 오전 채널톡으로 발송됩니다.' },
+  { type:'일반', title:'여름철 냉방 운영 가이드',        date:'07.05', fullDate:'2026.07.05', read:true,  isNew:false,
+    body:'여름 성수기 쾌적한 매장 환경을 위해 냉방 운영 가이드를 공유드립니다.\n\n■ 권장 설정 온도: 24~26℃\n■ 운영 시간: 매장 오픈 30분 전부터 가동\n■ 필터 청소: 2주 1회 권장\n■ 이상 발생 시: 문의 게시판 접수 또는 채널톡 연락\n\n쾌적한 공간 유지로 회원 만족도를 높여주세요!' },
+  { type:'필독', title:'6월 마케팅 지원 결과 공유',     date:'06.28', fullDate:'2026.06.28', read:true,  isNew:false,
+    body:'6월 한 달간 진행된 마케팅 지원 결과를 공유드립니다.\n\n■ 영수증 후기: 전 지점 평균 42건 신규 등록\n■ 블로그 리뷰: 강남구청역점 외 3개 지점 게시 완료\n■ 네이버 플레이스 리뷰: 전월 대비 +18%\n\n7월 신청은 서비스 신청 메뉴에서 접수해 주세요.' },
+  { type:'일반', title:'앤딩 브랜드 에셋 업데이트 안내', date:'06.20', fullDate:'2026.06.20', read:true,  isNew:false,
+    body:'브랜드 로고 및 에셋이 업데이트되었습니다.\n\n■ 변경 내용: 서브 로고 컬러 조정, 소셜 프로필 이미지 신규 추가\n■ 다운로드: 구글 드라이브 공유 폴더 > 브랜드 에셋 폴더\n\n기존 로고 파일은 2026년 8월부터 사용 중단 예정입니다. 미리 교체 부탁드립니다.' },
+  { type:'필독', title:'5월 점주 월간 미팅 안내',       date:'05.15', fullDate:'2026.05.15', read:true,  isNew:false,
+    body:'5월 점주 월간 미팅을 안내드립니다.\n\n■ 일시: 2026년 5월 15일 (목) 오후 7시\n■ 방식: Zoom 온라인 미팅\n■ 주요 안건: 5월 매출 분석 / 여름 시즌 준비 / 서비스 신청 현황\n\nZoom 링크는 미팅 당일 오전 채널톡으로 발송됩니다.' },
+  { type:'일반', title:'5월 정기 미팅 자료 공유',        date:'05.28', fullDate:'2026.05.28', read:true,  isNew:false,
+    body:'5월 점주 정기 미팅 자료를 공유드립니다.\n\n■ 주요 내용: 매출 분석 리포트 / 여름 시즌 준비 체크리스트 / Q&A 정리\n■ 자료 위치: 구글 드라이브 > 월간 미팅 > 2026년 5월\n\n자료 열람 링크는 채널톡으로 별도 발송되었습니다.' },
+  { type:'일반', title:'키오스크 앱 업데이트 안내',      date:'05.10', fullDate:'2026.05.10', read:true,  isNew:false,
+    body:'키오스크 앱이 v3.2.1로 업데이트되었습니다.\n\n■ 주요 변경사항: 결제 화면 UI 개선, 좌석 선택 속도 향상, 오류 메시지 한국어 지원\n■ 업데이트 방법: 키오스크 관리 화면 > 앱 업데이트 버튼 클릭\n\n업데이트 후 재부팅이 필요합니다.' },
+  { type:'필독', title:'4월 마케팅 지원 결과 공유',     date:'04.30', fullDate:'2026.04.30', read:true,  isNew:false,
+    body:'4월 마케팅 지원 결과를 공유드립니다.\n\n■ 영수증 후기: 전 지점 평균 38건\n■ 블로그 리뷰: 신규 4건 게시\n■ 당근 비즈프로필 팔로워: +12%\n\n5월 신청은 서비스 신청 메뉴에서 접수해 주세요.' },
+  { type:'일반', title:'냉난방 절전 운영 가이드',        date:'04.15', fullDate:'2026.04.15', read:true,  isNew:false,
+    body:'봄·여름 냉난방 전환 시기에 맞춰 절전 운영 가이드를 안내드립니다.\n\n■ 에어컨 가동 시작: 실내 온도 26℃ 이상 시\n■ 냉방 설정 온도: 24~25℃ 유지 권장\n■ 야간 절전: 심야 시간대 에어컨 타이머 활용\n\n전기 요금 절감을 위해 참고해 주세요.' },
+  { type:'필독', title:'3월 점주 월간 미팅 안내',       date:'03.20', fullDate:'2026.03.20', read:true,  isNew:false,
+    body:'3월 점주 월간 미팅 안내입니다.\n\n■ 일시: 2026년 3월 20일 (금) 오후 7시\n■ 방식: Zoom 온라인 미팅\n■ 주요 안건: 분기 매출 리뷰 / 상반기 마케팅 계획 / 시설 점검 일정\n\nZoom 링크는 미팅 당일 채널톡으로 발송됩니다.' },
+  { type:'일반', title:'봄 시즌 인테리어 가이드',        date:'03.05', fullDate:'2026.03.05', read:true,  isNew:false,
+    body:'봄 시즌에 맞춰 매장 분위기 업그레이드 가이드를 안내드립니다.\n\n■ 조명: 따뜻한 색온도(3000K) 조명 권장\n■ 소품: 초록 식물 배치로 자연스러운 분위기 연출\n■ 향기: 시트러스 계열 디퓨저 추천\n\n자세한 내용은 자료실 인테리어 가이드 파일을 참고해 주세요.' },
+];
+
+let currentFilter = '전체';
+let currentQuery = '';
+let visibleCount = PAGE_SIZE;
+
+function getFiltered() {
+  const q = currentQuery.trim().toLowerCase();
+  return ALL_NOTICES.filter(n => {
+    const typeMatch = currentFilter === '전체' || n.type === currentFilter;
+    const queryMatch = !q || n.title.toLowerCase().includes(q);
+    return typeMatch && queryMatch;
+  });
+}
+
+function renderNotices() {
+  const list = document.getElementById('notice-list');
+  const moreBtn = document.getElementById('more-btn');
+  const noResult = document.getElementById('no-result');
+  const pinSection = document.getElementById('pinned-section');
+
+  pinSection.style.display = currentFilter === '일반' ? 'none' : 'block';
+
+  const filtered = getFiltered();
+  const slice = filtered.slice(0, visibleCount);
+
+  list.innerHTML = '';
+
+  if (filtered.length === 0) {
+    noResult.style.display = 'block';
+    moreBtn.style.display = 'none';
+    return;
+  }
+  noResult.style.display = 'none';
+
+  slice.forEach(n => {
+    const dot = n.read
+      ? `<div style="width:9px;height:9px;border-radius:50%;background:#22c55e"></div>`
+      : `<div style="width:9px;height:9px;border-radius:50%;background:#ef4444"></div>`;
+
+    const pillTag = n.type === '필독'
+      ? `<span class="pill pill-required" style="flex-shrink:0;margin-top:1px">필독</span>`
+      : `<span class="pill" style="flex-shrink:0;margin-top:1px;background:#E8EDE1;color:#8C9C7A;border:1px solid #D8E0CF">일반</span>`;
+    const newTag = n.isNew
+      ? `<span class="pill pill-new" style="margin-left:4px;vertical-align:middle">NEW</span>`
+      : '';
+
+    const card = document.createElement('div');
+    card.className = 'notice-card';
+    card.onclick = () => openDetail(n.title, n.fullDate, n.type, n.body);
+    card.innerHTML = `
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px">
+        <div style="display:flex;align-items:flex-start;gap:7px;flex:1;min-width:0">
+          ${pillTag}
+          <p style="font-size:13px;font-weight:700;color:#1A2012;line-height:1.5">${n.title}${newTag}</p>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0">
+          ${dot}
+          <span style="font-size:10px;color:#A8B89C">${n.date}</span>
+        </div>
+      </div>`;
+    list.appendChild(card);
+  });
+
+  moreBtn.style.display = visibleCount < filtered.length ? 'block' : 'none';
+  const remaining = filtered.length - visibleCount;
+  if (remaining > 0) {
+    moreBtn.textContent = `더보기 (${Math.min(remaining, PAGE_SIZE)}/${remaining})`;
+  }
+}
+
+function setFilter(el, type) {
+  document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  currentFilter = type;
+  visibleCount = PAGE_SIZE;
+  renderNotices();
+}
+
+function onSearch(val) {
+  currentQuery = val;
+  visibleCount = PAGE_SIZE;
+  renderNotices();
+}
+
+function loadMore() {
+  visibleCount += PAGE_SIZE;
+  renderNotices();
+}
+
+function openDetail(title, date, type, body) {
+  document.getElementById('dTitle').textContent = title;
+  document.getElementById('dDate').textContent = date;
+  document.getElementById('dBody').textContent = body;
+
+  const badge = document.getElementById('dBadge');
+  badge.innerHTML = type === '필독'
+    ? '<span style="display:inline-flex;align-items:center;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;background:#FCDEDA;color:#B83A32">필독</span>'
+    : '';
+
+  const btn = document.getElementById('readBtn');
+  btn.textContent = '확인했어요 ✓';
+  btn.style.background = '#253016';
+  btn.style.color = '#E4FD97';
+  btn.disabled = false;
+
+  const v = document.getElementById('detailView');
+  v.classList.add('open');
+  v.scrollTop = 0;
+}
+
+function closeDetail() {
+  document.getElementById('detailView').classList.remove('open');
+}
+
+function markRead() {
+  const btn = document.getElementById('readBtn');
+  btn.textContent = '✓ 확인완료';
+  btn.style.background = '#4ade80';
+  btn.style.color = '#1A2012';
+  btn.disabled = true;
+  setTimeout(() => closeDetail(), 600);
+}
+
+renderNotices();
+</script>
+</body>
+</html>

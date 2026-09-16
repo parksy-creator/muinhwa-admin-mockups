@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1280,initial-scale=1">
+<title>본사 어드민 — 자료 관리</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+*{font-family:'Pretendard',-apple-system,sans-serif;box-sizing:border-box;margin:0;padding:0}
+body{background:#E8EDE1;color:#1A2012;min-height:100vh;min-width:1080px}
+.sb{width:220px;background:#253016;height:100vh;position:fixed;left:0;top:0;display:flex;flex-direction:column;z-index:100}
+.sb-logo{padding:18px 16px 14px;border-bottom:1px solid rgba(255,255,255,0.1);display:flex;align-items:center;gap:10px;flex-shrink:0}
+.sb-icon{width:34px;height:34px;background:#E4FD97;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sb-nav{flex:1;padding:8px;overflow-y:auto}
+.sb-sec{font-size:10px;color:rgba(255,255,255,0.35);padding:12px 10px 4px;letter-spacing:.8px;font-weight:700;text-transform:uppercase}
+.ni{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:9px;color:rgba(255,255,255,0.6);font-size:13px;font-weight:500;cursor:pointer;text-decoration:none;transition:background .15s}
+.ni:hover{background:rgba(255,255,255,0.07);color:#fff}
+.ni.on{background:rgba(228,253,151,0.15);color:#E4FD97;font-weight:700}
+.sb-user{padding:12px 14px;border-top:1px solid rgba(255,255,255,0.1);display:flex;align-items:center;gap:9px;flex-shrink:0}
+.sb-av{width:30px;height:30px;background:rgba(228,253,151,0.18);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.main{margin-left:220px;min-height:100vh}
+.ph{background:#fff;border-bottom:1px solid #E0E8D5;padding:0 28px;height:58px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+.ph-title{font-size:17px;font-weight:800;color:#1A2012}
+.ph-sub{font-size:11px;color:#8C9C7A;margin-top:1px}
+.content{padding:24px 28px}
+.card{background:#fff;border-radius:15px;overflow:hidden;box-shadow:0 1px 3px rgba(30,40,18,0.05),0 4px 10px rgba(30,40,18,0.04)}
+table{width:100%;border-collapse:collapse}
+th{background:#F8FAF5;color:#8C9C7A;font-size:11px;font-weight:700;padding:10px 14px;text-align:left;border-bottom:1px solid #EEF2E9}
+td{padding:11px 14px;border-bottom:1px solid #F0F4EC;font-size:13px;color:#1A2012;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#FAFCF8}
+.pill{display:inline-flex;align-items:center;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap}
+.btn{border:none;border-radius:9px;padding:8px 16px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Pretendard',sans-serif;display:inline-flex;align-items:center;gap:5px;white-space:nowrap;transition:background .15s}
+.btp{background:#253016;color:#E4FD97}.btp:hover{background:#3D4F28}
+.btg{background:#F0F5E8;color:#253016;border:none;cursor:pointer;font-family:'Pretendard',sans-serif;font-weight:600;display:inline-flex;align-items:center;border-radius:7px;padding:6px 12px;font-size:12px}
+.btg:hover{background:#E4EDD8}
+.btd{background:#FEF2F2;color:#DC2626;border:none;cursor:pointer;font-family:'Pretendard',sans-serif;font-weight:600;display:inline-flex;align-items:center;border-radius:7px;padding:6px 12px;font-size:12px}
+.btd:hover{background:#FEE2E2}
+input[type=text],select,textarea{border:1.5px solid #DDE6D0;border-radius:9px;padding:8px 13px;font-size:13px;color:#1A2012;background:#fff;font-family:'Pretendard',sans-serif;outline:none}
+input:focus,select:focus,textarea:focus{border-color:#253016}
+textarea{resize:vertical}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.35);z-index:200;align-items:center;justify-content:center}
+.modal{background:#fff;border-radius:18px;padding:28px;width:500px;max-width:90vw}
+.modal h3{font-size:16px;font-weight:800;color:#1A2012;margin-bottom:20px}
+.frow{display:flex;flex-direction:column;gap:14px;margin-bottom:20px}
+.fitem label{font-size:12px;font-weight:700;color:#5A6A48;display:block;margin-bottom:5px}
+.fitem input,.fitem select{width:100%}
+.fitem textarea{width:100%;min-height:80px}
+.sw{position:relative;display:inline-flex;align-items:center}
+.sw svg{position:absolute;left:11px;pointer-events:none;color:#8C9C7A}
+.sw input{padding-left:34px;width:220px}
+.ftab{padding:6px 14px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;border:1.5px solid #DDE6D0;font-family:'Pretendard',sans-serif;background:#fff;color:#8C9C7A;transition:all .15s}
+.ftab.on{background:#253016;color:#E4FD97;border-color:#253016}
+.file-drop{border:2px dashed #B8C9A8;border-radius:12px;padding:28px;background:#F8FAF5;display:flex;flex-direction:column;align-items:center;gap:10px;cursor:pointer;transition:background .15s;text-align:center}
+.file-drop:hover{background:#F0F4EC;border-color:#8C9C7A}
+.cat-홍보물{background:#FEF3FF;color:#7C3AED}
+.cat-매뉴얼{background:#EFF6FF;color:#1D4ED8}
+.cat-양식{background:#F0FDF4;color:#15803D}
+.cat-교육자료{background:#FFFBEB;color:#92400E}
+.cat-기타{background:#F3F4F6;color:#6B7280}
+.del-modal{background:#fff;border-radius:18px;padding:28px;width:380px;max-width:90vw;text-align:center}
+</style>
+</head>
+<body>
+
+<aside class="sb">
+  <div class="sb-logo">
+    <div class="sb-icon"><span style="font-size:15px;font-weight:900;color:#253016;font-family:Arial,sans-serif">무</span></div>
+    <div>
+      <div style="font-size:12px;font-weight:800;color:#fff;line-height:1.3">무인화연구소</div>
+      <div style="font-size:10px;color:rgba(255,255,255,0.42)">본사 어드민</div>
+    </div>
+  </div>
+  <nav class="sb-nav">
+    <div class="sb-sec">운영</div>
+    <a href="mockup-hq-대시보드.html" class="ni">
+      <svg width="15" height="15" fill="none" viewBox="0 0 16 16"><rect x="1" y="1" width="6" height="6" rx="1.5" fill="currentColor" opacity=".85"/><rect x="9" y="1" width="6" height="6" rx="1.5" fill="currentColor" opacity=".85"/><rect x="1" y="9" width="6" height="6" rx="1.5" fill="currentColor" opacity=".85"/><rect x="9" y="9" width="6" height="6" rx="1.5" fill="currentColor" opacity=".85"/></svg>
+      대시보드
+    </a>
+    <a href="mockup-hq-지점목록.html" class="ni">
+      <svg width="15" height="15" fill="none" viewBox="0 0 16 16"><path d="M2 14V7l6-5 6 5v7H2z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><rect x="5.5" y="9" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.4"/></svg>
+      지점 목록
+    </a>
+    <a href="mockup-hq-계정관리.html" class="ni">
+      <svg width="15" height="15" fill="none" viewBox="0 0 16 16"><circle cx="8" cy="5" r="3" stroke="currentColor" stroke-width="1.4"/><path d="M2 14c0-3.314 2.686-5 6-5s6 1.686 6 5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+      계정 관리
+    </a>
+    <div class="sb-sec" style="margin-top:4px">콘텐츠</div>
+    <a href="mockup-hq-공지관리.html" class="ni">
+      <svg width="15" height="15" fill="none" viewBox="0 0 16 16"><path d="M2 12V4a1 1 0 0 1 1-1h4l1.5 2H13a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1z" stroke="currentColor" stroke-width="1.4"/></svg>
+      공지 관리
+    </a>
+    <a href="mockup-hq-자료관리.html" class="ni on">
+      <svg width="15" height="15" fill="none" viewBox="0 0 16 16"><path d="M3 4.5h10M3 8h6M3 11.5h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      자료 관리
+    </a>
+    <a href="mockup-hq-문의관리.html" class="ni">
+      <svg width="15" height="15" fill="none" viewBox="0 0 16 16"><path d="M2 3a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1H5l-3 2V3z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
+      문의 관리
+    </a>
+    <a href="mockup-hq-서비스요청관리.html" class="ni">
+      <svg width="15" height="15" fill="none" viewBox="0 0 16 16"><rect x="2" y="3" width="12" height="11" rx="1.5" stroke="currentColor" stroke-width="1.4"/><path d="M5 6.5h6M5 9.5h4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><path d="M5.5 1.5h5v2h-5z" stroke="currentColor" stroke-width="1.3"/></svg>
+      서비스 요청
+    </a>
+  </nav>
+  <div class="sb-user">
+    <div class="sb-av"><span style="font-size:12px;font-weight:800;color:#E4FD97">박</span></div>
+    <div style="flex:1;min-width:0">
+      <div style="font-size:12px;font-weight:700;color:#fff">박소영</div>
+      <div style="font-size:10px;color:rgba(255,255,255,0.42)">본사 관리자</div>
+    </div>
+    <button style="background:none;border:none;cursor:pointer;padding:4px;opacity:.4;color:#fff" title="로그아웃">
+      <svg width="13" height="13" fill="none" viewBox="0 0 16 16"><path d="M6 14H3a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1h3M10 11l4-3-4-3M14 8H6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+  </div>
+</aside>
+
+<div class="main">
+  <header class="ph">
+    <div>
+      <div class="ph-title">자료 관리</div>
+      <div class="ph-sub">점주 포털 자료실에 게시할 파일을 업로드하고 관리합니다</div>
+    </div>
+    <button class="btn btp" onclick="openUpload()">
+      <svg width="13" height="13" fill="none" viewBox="0 0 14 14"><path d="M7 1v12M1 7h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      자료 업로드
+    </button>
+  </header>
+  <div class="content">
+
+    <!-- 툴바 -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;gap:12px">
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        <button class="ftab on" onclick="setFilter(this)">전체 (12)</button>
+        <button class="ftab" onclick="setFilter(this)">홍보물 (4)</button>
+        <button class="ftab" onclick="setFilter(this)">매뉴얼 (3)</button>
+        <button class="ftab" onclick="setFilter(this)">양식 (3)</button>
+        <button class="ftab" onclick="setFilter(this)">교육자료 (2)</button>
+      </div>
+      <div class="sw">
+        <svg width="14" height="14" fill="none" viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.5" stroke="currentColor" stroke-width="1.5"/><path d="M10.5 10.5L14 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <input type="text" placeholder="파일명 검색">
+      </div>
+    </div>
+
+    <div class="card">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:44px">#</th>
+            <th>파일명</th>
+            <th style="width:90px">카테고리</th>
+            <th style="width:100px">업로드일</th>
+            <th style="width:80px;text-align:right">크기</th>
+            <th style="width:80px;text-align:right">다운로드</th>
+            <th style="width:110px;text-align:center">관리</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="color:#A0AE8E;font-size:12px">12</td>
+            <td>
+              <div style="display:flex;align-items:center;gap:8px">
+                <div style="width:28px;height:28px;background:#FEF3FF;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                  <svg width="14" height="14" fill="none" viewBox="0 0 16 16"><path d="M3 2h7l3 3v9H3V2z" stroke="#7C3AED" stroke-width="1.4" stroke-linejoin="round"/><path d="M10 2v4h4" stroke="#7C3AED" stroke-width="1.4"/></svg>
+                </div>
+                <span style="font-weight:600">2026 여름 마케팅 키트.zip</span>
+              </div>
+            </td>
+            <td><span class="pill cat-홍보물" style="font-size:10px;padding:2px 8px">홍보물</span></td>
+            <td style="color:#5A6A48;font-size:12px">2026.07.10</td>
+            <td style="text-align:right;color:#5A6A48;font-size:12px">45.2 MB</td>
+            <td style="text-align:right;font-weight:600">284</td>
+            <td style="text-align:center">
+              <div style="display:flex;gap:5px;justify-content:center">
+                <button class="btg">다운로드</button>
+                <button class="btd" onclick="openDel('2026 여름 마케팅 키트.zip')">삭제</button>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td style="color:#A0AE8E;font-size:12px">11</td>
+            <td>
+              <div style="display:flex;align-items:center;gap:8px">
+                <div style="width:28px;height:28px;background:#EFF6FF;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                  <svg width="14" height="14" fill="none" viewBox="0 0 16 16"><path d="M3 2h7l3 3v9H3V2z" stroke="#1D4ED8" stroke-width="1.4" stroke-linejoin="round"/><path d="M10 2v4h4" stroke="#1D4ED8" stroke-width="1.4"/></svg>
+                </div>
+                <span style="font-weight:600">앤딩 운영 매뉴얼 v3.0.pdf</span>
+              </div>
+            </td>
+            <td><span class="pill cat-매뉴얼" style="font-size:10px;padding:2px 8px">매뉴얼</span></td>
+            <td style="color:#5A6A48;font-size:12px">2026.07.05</td>
+            <td style="text-align:right;color:#5A6A48;font-size:12px">8.7 MB</td>
+            <td style="text-align:right;font-weight:600">156</td>
+            <td style="text-align:center">
+              <div style="display:flex;gap:5px;justify-content:center">
+                <button class="btg">다운로드</button>
+                <button class="btd" onclick="openDel('앤딩 운영 매뉴얼 v3.0.pdf')">삭제</button>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td style="color:#A0AE8E;font-size:12px">10</td>
+            <td>
+              <div style="display:flex;align-items:center;gap:8px">
+                <div style="width:28px;height:28px;background:#FEF3FF;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                  <svg width="14" height="14" fill="none" viewBox="0 0 16 16"><path d="M3 2h7l3 3v9H3V2z" stroke="#7C3AED" stroke-width="1.4" stroke-linejoin="round"/><path d="M10 2v4h4" stroke="#7C3AED" stroke-width="1.4"/></svg>
+                </div>
+                <span style="font-weight:600">영수증 후기 이벤트 포스터.png</span>
+              </div>
+            </td>
+            <td><span class="pill cat-홍보물" style="font-size:10px;padding:2px 8px">홍보물</span></td>
+            <td style="color:#5A6A48;font-size:12px">2026.07.01</td>
+            <td style="text-align:right;color:#5A6A48;font-size:12px">3.4 MB</td>
+            <td style="text-align:right;font-weight:600">201</td>
+            <td style="text-align:center">
+              <div style="display:flex;gap:5px;justify-content:center">
+                <button class="btg">다운로드</button>
+                <button class="btd" onclick="openDel('영수증 후기 이벤트 포스터.png')">삭제</button>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td style="color:#A0AE8E;font-size:12px">9</td>
+            <td>
+              <div style="display:flex;align-items:center;gap:8px">
+                <div style="width:28px;height:28px;background:#EFF6FF;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                  <svg width="14" height="14" fill="none" viewBox="0 0 16 16"><path d="M3 2h7l3 3v9H3V2z" stroke="#1D4ED8" stroke-width="1.4" stroke-linejoin="round"/><path d="M10 2v4h4" stroke="#1D4ED8" stroke-width="1.4"/></svg>
+                </div>
+                <span style="font-weight:600">점주 포털 이용 가이드.pdf</span>
+              </div>
+            </td>
+            <td><span class="pill cat-매뉴얼" style="font-size:10px;padding:2px 8px">매뉴얼</span></td>
+            <td style="color:#5A6A48;font-size:12px">2026.06.20</td>
+            <td style="text-align:right;color:#5A6A48;font-size:12px">2.1 MB</td>
+            <td style="text-align:right;font-weight:600">324</td>
+            <td style="text-align:center">
+              <div style="display:flex;gap:5px;justify-content:center">
+                <button class="btg">다운로드</button>
+                <button class="btd" onclick="openDel('점주 포털 이용 가이드.pdf')">삭제</button>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td style="color:#A0AE8E;font-size:12px">8</td>
+            <td>
+              <div style="display:flex;align-items:center;gap:8px">
+                <div style="width:28px;height:28px;background:#F0FDF4;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                  <svg width="14" height="14" fill="none" viewBox="0 0 16 16"><path d="M3 2h7l3 3v9H3V2z" stroke="#15803D" stroke-width="1.4" stroke-linejoin="round"/><path d="M10 2v4h4" stroke="#15803D" stroke-width="1.4"/></svg>
+                </div>
+                <span style="font-weight:600">계약서 양식 2026.docx</span>
+              </div>
+            </td>
+            <td><span class="pill cat-양식" style="font-size:10px;padding:2px 8px">양식</span></td>
+            <td style="color:#5A6A48;font-size:12px">2026.06.15</td>
+            <td style="text-align:right;color:#5A6A48;font-size:12px">0.8 MB</td>
+            <td style="text-align:right;font-weight:600">145</td>
+            <td style="text-align:center">
+              <div style="display:flex;gap:5px;justify-content:center">
+                <button class="btg">다운로드</button>
+                <button class="btd" onclick="openDel('계약서 양식 2026.docx')">삭제</button>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td style="color:#A0AE8E;font-size:12px">7</td>
+            <td>
+              <div style="display:flex;align-items:center;gap:8px">
+                <div style="width:28px;height:28px;background:#EFF6FF;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                  <svg width="14" height="14" fill="none" viewBox="0 0 16 16"><path d="M3 2h7l3 3v9H3V2z" stroke="#1D4ED8" stroke-width="1.4" stroke-linejoin="round"/><path d="M10 2v4h4" stroke="#1D4ED8" stroke-width="1.4"/></svg>
+                </div>
+                <span style="font-weight:600">키오스크 장애 대응 매뉴얼.pdf</span>
+              </div>
+            </td>
+            <td><span class="pill cat-매뉴얼" style="font-size:10px;padding:2px 8px">매뉴얼</span></td>
+            <td style="color:#5A6A48;font-size:12px">2026.06.10</td>
+            <td style="text-align:right;color:#5A6A48;font-size:12px">5.2 MB</td>
+            <td style="text-align:right;font-weight:600">98</td>
+            <td style="text-align:center">
+              <div style="display:flex;gap:5px;justify-content:center">
+                <button class="btg">다운로드</button>
+                <button class="btd" onclick="openDel('키오스크 장애 대응 매뉴얼.pdf')">삭제</button>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td style="color:#A0AE8E;font-size:12px">6</td>
+            <td>
+              <div style="display:flex;align-items:center;gap:8px">
+                <div style="width:28px;height:28px;background:#F0FDF4;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                  <svg width="14" height="14" fill="none" viewBox="0 0 16 16"><path d="M3 2h7l3 3v9H3V2z" stroke="#15803D" stroke-width="1.4" stroke-linejoin="round"/><path d="M10 2v4h4" stroke="#15803D" stroke-width="1.4"/></svg>
+                </div>
+                <span style="font-weight:600">가맹비 정산 안내 양식.xlsx</span>
+              </div>
+            </td>
+            <td><span class="pill cat-양식" style="font-size:10px;padding:2px 8px">양식</span></td>
+            <td style="color:#5A6A48;font-size:12px">2026.06.05</td>
+            <td style="text-align:right;color:#5A6A48;font-size:12px">0.5 MB</td>
+            <td style="text-align:right;font-weight:600">67</td>
+            <td style="text-align:center">
+              <div style="display:flex;gap:5px;justify-content:center">
+                <button class="btg">다운로드</button>
+                <button class="btd" onclick="openDel('가맹비 정산 안내 양식.xlsx')">삭제</button>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td style="color:#A0AE8E;font-size:12px">5</td>
+            <td>
+              <div style="display:flex;align-items:center;gap:8px">
+                <div style="width:28px;height:28px;background:#FFFBEB;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                  <svg width="14" height="14" fill="none" viewBox="0 0 16 16"><path d="M3 2h7l3 3v9H3V2z" stroke="#92400E" stroke-width="1.4" stroke-linejoin="round"/><path d="M10 2v4h4" stroke="#92400E" stroke-width="1.4"/></svg>
+                </div>
+                <span style="font-weight:600">브랜드 가이드라인 2026.pdf</span>
+              </div>
+            </td>
+            <td><span class="pill cat-교육자료" style="font-size:10px;padding:2px 8px">교육자료</span></td>
+            <td style="color:#5A6A48;font-size:12px">2026.05.28</td>
+            <td style="text-align:right;color:#5A6A48;font-size:12px">15.3 MB</td>
+            <td style="text-align:right;font-weight:600">234</td>
+            <td style="text-align:center">
+              <div style="display:flex;gap:5px;justify-content:center">
+                <button class="btg">다운로드</button>
+                <button class="btd" onclick="openDel('브랜드 가이드라인 2026.pdf')">삭제</button>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td style="color:#A0AE8E;font-size:12px">4</td>
+            <td>
+              <div style="display:flex;align-items:center;gap:8px">
+                <div style="width:28px;height:28px;background:#FFFBEB;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                  <svg width="14" height="14" fill="none" viewBox="0 0 16 16"><path d="M3 2h7l3 3v9H3V2z" stroke="#92400E" stroke-width="1.4" stroke-linejoin="round"/><path d="M10 2v4h4" stroke="#92400E" stroke-width="1.4"/></svg>
+                </div>
+                <span style="font-weight:600">직원 교육 자료집.pptx</span>
+              </div>
+            </td>
+            <td><span class="pill cat-교육자료" style="font-size:10px;padding:2px 8px">교육자료</span></td>
+            <td style="color:#5A6A48;font-size:12px">2026.05.20</td>
+            <td style="text-align:right;color:#5A6A48;font-size:12px">22.8 MB</td>
+            <td style="text-align:right;font-weight:600">112</td>
+            <td style="text-align:center">
+              <div style="display:flex;gap:5px;justify-content:center">
+                <button class="btg">다운로드</button>
+                <button class="btd" onclick="openDel('직원 교육 자료집.pptx')">삭제</button>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td style="color:#A0AE8E;font-size:12px">3</td>
+            <td>
+              <div style="display:flex;align-items:center;gap:8px">
+                <div style="width:28px;height:28px;background:#F0FDF4;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                  <svg width="14" height="14" fill="none" viewBox="0 0 16 16"><path d="M3 2h7l3 3v9H3V2z" stroke="#15803D" stroke-width="1.4" stroke-linejoin="round"/><path d="M10 2v4h4" stroke="#15803D" stroke-width="1.4"/></svg>
+                </div>
+                <span style="font-weight:600">시설 점검 체크리스트.xlsx</span>
+              </div>
+            </td>
+            <td><span class="pill cat-양식" style="font-size:10px;padding:2px 8px">양식</span></td>
+            <td style="color:#5A6A48;font-size:12px">2026.05.15</td>
+            <td style="text-align:right;color:#5A6A48;font-size:12px">0.3 MB</td>
+            <td style="text-align:right;font-weight:600">89</td>
+            <td style="text-align:center">
+              <div style="display:flex;gap:5px;justify-content:center">
+                <button class="btg">다운로드</button>
+                <button class="btd" onclick="openDel('시설 점검 체크리스트.xlsx')">삭제</button>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td style="color:#A0AE8E;font-size:12px">2</td>
+            <td>
+              <div style="display:flex;align-items:center;gap:8px">
+                <div style="width:28px;height:28px;background:#FEF3FF;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                  <svg width="14" height="14" fill="none" viewBox="0 0 16 16"><path d="M3 2h7l3 3v9H3V2z" stroke="#7C3AED" stroke-width="1.4" stroke-linejoin="round"/><path d="M10 2v4h4" stroke="#7C3AED" stroke-width="1.4"/></svg>
+                </div>
+                <span style="font-weight:600">앤딩 BI 로고팩.zip</span>
+              </div>
+            </td>
+            <td><span class="pill cat-홍보물" style="font-size:10px;padding:2px 8px">홍보물</span></td>
+            <td style="color:#5A6A48;font-size:12px">2026.05.10</td>
+            <td style="text-align:right;color:#5A6A48;font-size:12px">31.7 MB</td>
+            <td style="text-align:right;font-weight:600">176</td>
+            <td style="text-align:center">
+              <div style="display:flex;gap:5px;justify-content:center">
+                <button class="btg">다운로드</button>
+                <button class="btd" onclick="openDel('앤딩 BI 로고팩.zip')">삭제</button>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td style="color:#A0AE8E;font-size:12px">1</td>
+            <td>
+              <div style="display:flex;align-items:center;gap:8px">
+                <div style="width:28px;height:28px;background:#FEF3FF;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                  <svg width="14" height="14" fill="none" viewBox="0 0 16 16"><path d="M3 2h7l3 3v9H3V2z" stroke="#7C3AED" stroke-width="1.4" stroke-linejoin="round"/><path d="M10 2v4h4" stroke="#7C3AED" stroke-width="1.4"/></svg>
+                </div>
+                <span style="font-weight:600">7월 SNS 콘텐츠 템플릿.psd</span>
+              </div>
+            </td>
+            <td><span class="pill cat-홍보물" style="font-size:10px;padding:2px 8px">홍보물</span></td>
+            <td style="color:#5A6A48;font-size:12px">2026.06.28</td>
+            <td style="text-align:right;color:#5A6A48;font-size:12px">12.1 MB</td>
+            <td style="text-align:right;font-weight:600">87</td>
+            <td style="text-align:center">
+              <div style="display:flex;gap:5px;justify-content:center">
+                <button class="btg">다운로드</button>
+                <button class="btd" onclick="openDel('7월 SNS 콘텐츠 템플릿.psd')">삭제</button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</div>
+
+<!-- 업로드 모달 -->
+<div class="overlay" id="uploadOverlay" onclick="if(event.target===this)closeUpload()">
+  <div class="modal">
+    <h3>자료 업로드</h3>
+    <div class="frow">
+      <div class="fitem">
+        <label>파일 첨부 <span style="color:#ef4444">*</span></label>
+        <div class="file-drop">
+          <svg width="28" height="28" fill="none" viewBox="0 0 32 32" style="color:#8C9C7A"><path d="M16 22V10m0 0l-5 5m5-5l5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 24v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          <p style="font-size:13px;font-weight:600;color:#5A6A48">파일을 드래그하거나 클릭해서 업로드</p>
+          <p style="font-size:11px;color:#A0AE8E">PDF, PNG, JPG, ZIP, XLSX, PPTX (최대 100MB)</p>
+        </div>
+      </div>
+      <div class="fitem">
+        <label>자료명 <span style="color:#ef4444">*</span></label>
+        <input type="text" placeholder="점주에게 표시될 파일명">
+      </div>
+      <div class="fitem">
+        <label>카테고리 <span style="color:#ef4444">*</span></label>
+        <select>
+          <option>홍보물</option>
+          <option>매뉴얼</option>
+          <option>양식</option>
+          <option>교육자료</option>
+          <option>기타</option>
+        </select>
+      </div>
+      <div class="fitem">
+        <label>설명 <span style="color:#8C9C7A;font-weight:400">(선택)</span></label>
+        <textarea placeholder="자료에 대한 간단한 설명을 입력하세요" style="min-height:72px"></textarea>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button class="btn btg" onclick="closeUpload()">취소</button>
+      <button class="btn btp" onclick="doUpload()">업로드</button>
+    </div>
+  </div>
+</div>
+
+<!-- 삭제 확인 모달 -->
+<div class="overlay" id="delOverlay" onclick="if(event.target===this)closeDel()">
+  <div class="del-modal">
+    <div style="width:48px;height:48px;background:#FEF2F2;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px">
+      <svg width="22" height="22" fill="none" viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6" stroke="#DC2626" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    <p style="font-size:15px;font-weight:800;color:#1A2012;margin-bottom:6px">자료를 삭제하시겠습니까?</p>
+    <p style="font-size:13px;color:#8C9C7A;line-height:1.6;margin-bottom:6px" id="delName"></p>
+    <p style="font-size:12px;color:#EF4444;margin-bottom:22px">삭제하면 점주 포털 자료실에서 즉시 사라집니다.</p>
+    <div style="display:flex;gap:8px">
+      <button class="btn" style="flex:1;background:#F0F4EC;color:#5A6A48;justify-content:center;font-size:13px" onclick="closeDel()">취소</button>
+      <button class="btn" style="flex:1;background:#DC2626;color:#fff;justify-content:center;font-size:13px" onclick="confirmDel()">삭제</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function openUpload(){const o=document.getElementById('uploadOverlay');o.style.display='flex';o.style.alignItems='center';o.style.justifyContent='center';}
+function closeUpload(){document.getElementById('uploadOverlay').style.display='none'}
+function doUpload(){closeUpload();alert('자료가 업로드되었습니다. 점주 포털 자료실에 즉시 표시됩니다.')}
+function openDel(name){
+  document.getElementById('delName').textContent='"'+name+'"';
+  const o=document.getElementById('delOverlay');
+  o.style.display='flex';o.style.alignItems='center';o.style.justifyContent='center';
+}
+function closeDel(){document.getElementById('delOverlay').style.display='none'}
+function confirmDel(){closeDel();alert('삭제되었습니다.')}
+function setFilter(btn){document.querySelectorAll('.ftab').forEach(t=>t.classList.remove('on'));btn.classList.add('on');}
+</script>
+</body>
+</html>

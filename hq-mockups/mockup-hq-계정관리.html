@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1280,initial-scale=1">
+<title>본사 어드민 — 계정 관리</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+*{font-family:'Pretendard',-apple-system,sans-serif;box-sizing:border-box;margin:0;padding:0}
+body{background:#E8EDE1;color:#1A2012;min-height:100vh;min-width:1080px}
+.sb{width:220px;background:#253016;height:100vh;position:fixed;left:0;top:0;display:flex;flex-direction:column;z-index:100}
+.sb-logo{padding:18px 16px 14px;border-bottom:1px solid rgba(255,255,255,0.1);display:flex;align-items:center;gap:10px;flex-shrink:0}
+.sb-icon{width:34px;height:34px;background:#E4FD97;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sb-nav{flex:1;padding:8px;overflow-y:auto}
+.sb-sec{font-size:10px;color:rgba(255,255,255,0.35);padding:12px 10px 4px;letter-spacing:.8px;font-weight:700;text-transform:uppercase}
+.ni{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:9px;color:rgba(255,255,255,0.6);font-size:13px;font-weight:500;cursor:pointer;text-decoration:none;transition:background .15s}
+.ni:hover{background:rgba(255,255,255,0.07);color:#fff}
+.ni.on{background:rgba(228,253,151,0.15);color:#E4FD97;font-weight:700}
+.sb-user{padding:12px 14px;border-top:1px solid rgba(255,255,255,0.1);display:flex;align-items:center;gap:9px;flex-shrink:0}
+.sb-av{width:30px;height:30px;background:rgba(228,253,151,0.18);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.main{margin-left:220px;min-height:100vh}
+.ph{background:#fff;border-bottom:1px solid #E0E8D5;padding:0 28px;height:58px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+.ph-title{font-size:17px;font-weight:800;color:#1A2012}
+.ph-sub{font-size:11px;color:#8C9C7A;margin-top:1px}
+.content{padding:24px 28px}
+.card{background:#fff;border-radius:15px;overflow:hidden;box-shadow:0 1px 3px rgba(30,40,18,0.05),0 4px 10px rgba(30,40,18,0.04)}
+table{width:100%;border-collapse:collapse}
+th{background:#F8FAF5;color:#8C9C7A;font-size:11px;font-weight:700;padding:10px 14px;text-align:left;border-bottom:1px solid #EEF2E9}
+td{padding:11px 14px;border-bottom:1px solid #F0F4EC;font-size:13px;color:#1A2012;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#FAFCF8}
+.pill{display:inline-flex;align-items:center;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap}
+.pg{background:#dcfce7;color:#15803d}.pw{background:#fef9c3;color:#a16207}.pc{background:#fee2e2;color:#b91c1c}.pb{background:#dbeafe;color:#1d4ed8}.pgr{background:#f3f4f6;color:#6b7280}.pp{background:#f3e8ff;color:#6b21a8}
+.btn{border:none;border-radius:9px;padding:8px 16px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Pretendard',sans-serif;display:inline-flex;align-items:center;gap:5px;white-space:nowrap;transition:background .15s}
+.btp{background:#253016;color:#E4FD97}.btp:hover{background:#3D4F28}
+.btg{background:#F0F5E8;color:#253016;border:none;cursor:pointer;font-family:'Pretendard',sans-serif;font-weight:600;display:inline-flex;align-items:center;border-radius:7px;padding:6px 11px;font-size:12px}
+.btg:hover{background:#E4EDD8}
+.btw{background:#FEF9C3;color:#92400E;border:none;cursor:pointer;font-family:'Pretendard',sans-serif;font-weight:600;display:inline-flex;align-items:center;border-radius:7px;padding:6px 11px;font-size:12px}
+.btw:hover{background:#FEF3C7}
+.btd{background:#FEF2F2;color:#DC2626;border:none;cursor:pointer;font-family:'Pretendard',sans-serif;font-weight:600;display:inline-flex;align-items:center;border-radius:7px;padding:6px 11px;font-size:12px}
+.btd:hover{background:#FEE2E2}
+input[type=text],input[type=email],input[type=password],select{border:1.5px solid #DDE6D0;border-radius:9px;padding:8px 13px;font-size:13px;color:#1A2012;background:#fff;font-family:'Pretendard',sans-serif;outline:none}
+input:focus,select:focus{border-color:#253016}
+.sw{position:relative;display:inline-flex;align-items:center}
+.sw svg{position:absolute;left:11px;pointer-events:none;color:#8C9C7A}
+.sw input{padding-left:34px;width:260px}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.35);z-index:200;align-items:center;justify-content:center}
+.modal{background:#fff;border-radius:18px;padding:28px;width:460px;max-width:90vw}
+.modal h3{font-size:16px;font-weight:800;color:#1A2012;margin-bottom:6px}
+.modal .sub{font-size:12px;color:#8C9C7A;margin-bottom:22px}
+.frow{display:flex;flex-direction:column;gap:14px;margin-bottom:18px}
+.fitem label{font-size:12px;font-weight:700;color:#5A6A48;display:block;margin-bottom:5px}
+.fitem input,.fitem select{width:100%}
+.note-box{background:#F0F5E8;border-radius:10px;padding:12px 14px;margin-bottom:18px;font-size:12px;color:#5A6A48;line-height:1.6}
+.reset-modal{background:#fff;border-radius:18px;padding:28px;width:400px;max-width:90vw;text-align:center}
+/* 탭 */
+.tab-group{display:flex;gap:0;background:#F0F5E8;border-radius:11px;padding:4px;width:fit-content}
+.tab{padding:7px 20px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;color:#8C9C7A;border:none;background:none;font-family:'Pretendard',sans-serif;transition:all .15s}
+.tab.on{background:#fff;color:#253016;font-weight:700;box-shadow:0 1px 4px rgba(0,0,0,0.08)}
+/* 직원 아바타 */
+.av{width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0}
+.av-me{background:#E4FD97;color:#253016}
+.av-1{background:#C7D2FE;color:#3730A3}
+.av-2{background:#FED7AA;color:#9A3412}
+.av-3{background:#BBF7D0;color:#14532D}
+</style>
+</head>
+<body>
+
+<aside class="sb">
+  <div class="sb-logo">
+    <div class="sb-icon"><span style="font-size:15px;font-weight:900;color:#253016;font-family:Arial,sans-serif">무</span></div>
+    <div>
+      <div style="font-size:12px;font-weight:800;color:#fff;line-height:1.3">무인화연구소</div>
+      <div style="font-size:10px;color:rgba(255,255,255,0.42)">본사 어드민</div>
+    </div>
+  </div>
+  <nav class="sb-nav">
+    <div class="sb-sec">운영</div>
+    <a href="mockup-hq-대시보드.html" class="ni">
+      <svg width="15" height="15" fill="none" viewBox="0 0 16 16"><rect x="1" y="1" width="6" height="6" rx="1.5" fill="currentColor" opacity=".85"/><rect x="9" y="1" width="6" height="6" rx="1.5" fill="currentColor" opacity=".85"/><rect x="1" y="9" width="6" height="6" rx="1.5" fill="currentColor" opacity=".85"/><rect x="9" y="9" width="6" height="6" rx="1.5" fill="currentColor" opacity=".85"/></svg>
+      대시보드
+    </a>
+    <a href="mockup-hq-지점목록.html" class="ni">
+      <svg width="15" height="15" fill="none" viewBox="0 0 16 16"><path d="M2 14V7l6-5 6 5v7H2z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><rect x="5.5" y="9" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.4"/></svg>
+      지점 목록
+    </a>
+    <a href="mockup-hq-계정관리.html" class="ni on">
+      <svg width="15" height="15" fill="none" viewBox="0 0 16 16"><circle cx="8" cy="5" r="3" stroke="currentColor" stroke-width="1.4"/><path d="M2 14c0-3.314 2.686-5 6-5s6 1.686 6 5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+      계정 관리
+    </a>
+    <div class="sb-sec" style="margin-top:4px">콘텐츠</div>
+    <a href="mockup-hq-공지관리.html" class="ni">
+      <svg width="15" height="15" fill="none" viewBox="0 0 16 16"><path d="M2 12V4a1 1 0 0 1 1-1h4l1.5 2H13a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1z" stroke="currentColor" stroke-width="1.4"/></svg>
+      공지 관리
+    </a>
+    <a href="mockup-hq-자료관리.html" class="ni">
+      <svg width="15" height="15" fill="none" viewBox="0 0 16 16"><path d="M3 4.5h10M3 8h6M3 11.5h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      자료 관리
+    </a>
+    <a href="mockup-hq-문의관리.html" class="ni">
+      <svg width="15" height="15" fill="none" viewBox="0 0 16 16"><path d="M2 3a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1H5l-3 2V3z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
+      문의 관리
+    </a>
+    <a href="mockup-hq-서비스요청관리.html" class="ni">
+      <svg width="15" height="15" fill="none" viewBox="0 0 16 16"><rect x="2" y="3" width="12" height="11" rx="1.5" stroke="currentColor" stroke-width="1.4"/><path d="M5 6.5h6M5 9.5h4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><path d="M5.5 1.5h5v2h-5z" stroke="currentColor" stroke-width="1.3"/></svg>
+      서비스 요청
+    </a>
+  </nav>
+  <div class="sb-user">
+    <div class="sb-av"><span style="font-size:12px;font-weight:800;color:#E4FD97">박</span></div>
+    <div style="flex:1;min-width:0">
+      <div style="font-size:12px;font-weight:700;color:#fff">박소영</div>
+      <div style="font-size:10px;color:rgba(255,255,255,0.42)">본사 관리자</div>
+    </div>
+    <button style="background:none;border:none;cursor:pointer;padding:4px;opacity:.4;color:#fff" title="로그아웃">
+      <svg width="13" height="13" fill="none" viewBox="0 0 16 16"><path d="M6 14H3a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1h3M10 11l4-3-4-3M14 8H6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+  </div>
+</aside>
+
+<div class="main">
+  <header class="ph">
+    <div>
+      <div class="ph-title">계정 관리</div>
+      <div class="ph-sub" id="phSub">직원 10명 · 점주 38명</div>
+    </div>
+    <button class="btn btp" id="createBtn" onclick="openCreate()">
+      <svg width="13" height="13" fill="none" viewBox="0 0 14 14"><path d="M7 1v12M1 7h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      <span id="createBtnText">직원 계정 생성</span>
+    </button>
+  </header>
+
+  <div class="content">
+
+    <!-- 탭 + 필터 -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px">
+      <div class="tab-group">
+        <button class="tab on" id="tabStaff" onclick="switchTab('staff')">직원 계정</button>
+        <button class="tab" id="tabOwner" onclick="switchTab('owner')">점주 계정</button>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center">
+        <div class="sw">
+          <svg width="14" height="14" fill="none" viewBox="0 0 16 16"><circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.4"/><path d="m11 11 3 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+          <input type="text" placeholder="이름, 이메일 검색">
+        </div>
+        <select id="filterStatus" style="padding:8px 12px">
+          <option>전체 상태</option>
+          <option>활성</option>
+          <option>비활성</option>
+        </select>
+        <select id="filterRole" style="padding:8px 12px;display:none">
+          <option>전체 역할</option>
+          <option>관리자</option>
+          <option>담당자</option>
+        </select>
+        <select id="filterPw" style="padding:8px 12px">
+          <option>비밀번호 전체</option>
+          <option>기본값 사용중</option>
+          <option>변경 완료</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- 직원 계정 테이블 -->
+    <div id="staffTable" class="card">
+      <!-- Slack 연동 배너 -->
+      <div style="padding:12px 18px;border-bottom:1px solid #E8EEE0;background:#F6FAF2;display:flex;align-items:center;justify-content:space-between;gap:16px">
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="width:28px;height:28px;background:#4A154B;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+            <svg width="15" height="15" viewBox="0 0 124 124" fill="none"><path d="M26.3 78.4c0 7.2-5.9 13.1-13.1 13.1S.1 85.6.1 78.4s5.9-13.1 13.1-13.1h13.1v13.1z" fill="#fff"/><path d="M32.9 78.4c0-7.2 5.9-13.1 13.1-13.1s13.1 5.9 13.1 13.1v32.8c0 7.2-5.9 13.1-13.1 13.1s-13.1-5.9-13.1-13.1V78.4z" fill="#fff"/><path d="M46 26.3c-7.2 0-13.1-5.9-13.1-13.1S38.8.1 46 .1s13.1 5.9 13.1 13.1v13.1H46z" fill="#fff"/><path d="M46 32.9c7.2 0 13.1 5.9 13.1 13.1s-5.9 13.1-13.1 13.1H13.1C5.9 59.1.1 53.2.1 46S5.9 32.9 13.1 32.9H46z" fill="#fff"/><path d="M97.6 46c0-7.2 5.9-13.1 13.1-13.1s13.1 5.9 13.1 13.1-5.9 13.1-13.1 13.1H97.6V46z" fill="#fff"/><path d="M91.1 46c0 7.2-5.9 13.1-13.1 13.1s-13.1-5.9-13.1-13.1V13.1C64.9 5.9 70.8.1 78 .1s13.1 5.9 13.1 13.1V46z" fill="#fff"/><path d="M78 97.6c7.2 0 13.1 5.9 13.1 13.1s-5.9 13.1-13.1 13.1-13.1-5.9-13.1-13.1V97.6H78z" fill="#fff"/><path d="M78 91.1c-7.2 0-13.1-5.9-13.1-13.1s5.9-13.1 13.1-13.1h32.8c7.2 0 13.1 5.9 13.1 13.1s-5.9 13.1-13.1 13.1H78z" fill="#fff"/></svg>
+          </div>
+          <div>
+            <div style="font-size:12px;font-weight:700;color:#1A2012">muinhwa.slack.com 연동됨</div>
+            <div style="font-size:11px;color:#8C9C7A;margin-top:1px">워크스페이스 멤버와 자동 동기화 · 현재 직원 10명 일치</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:7px;flex-shrink:0">
+          <button class="btg" onclick="alert('Slack 워크스페이스에서 멤버를 불러옵니다.\n\n확인된 멤버 (10명):\n박소영, 유연준, 류기령, 박영욱, 최민철\n신나라, 신태순, 박현규, 김한준, 송영호\n\n→ 모두 이미 동기화되어 있습니다.')">Slack에서 불러오기</button>
+          <button class="btg" style="color:#8C9C7A" onclick="alert('Slack 연동 설정\n\n워크스페이스: muinhwa.slack.com\n채널 알림: #박소영개인\n마지막 동기화: 2026.07.21 09:00\n총 멤버: 10명')">연동 설정</button>
+        </div>
+      </div>
+      <table>
+        <thead><tr>
+          <th style="width:200px">직원</th>
+          <th>이메일</th>
+          <th style="width:110px">역할</th>
+          <th style="width:160px">마지막 로그인</th>
+          <th style="width:80px">상태</th>
+          <th style="text-align:center;width:180px">관리</th>
+        </tr></thead>
+        <tbody>
+          <!-- 박소영 (현재 로그인) -->
+          <tr style="background:#FAFDF5">
+            <td>
+              <div style="display:flex;align-items:center;gap:10px">
+                <div class="av av-me">박</div>
+                <div>
+                  <div style="font-weight:700;font-size:13px">박소영
+                    <span style="font-size:10px;background:#E4FD97;color:#253016;border-radius:4px;padding:1px 6px;font-weight:700;margin-left:4px">나</span>
+                  </div>
+                </div>
+              </div>
+            </td>
+            <td style="color:#5A6A48;font-size:12px">parksy@muinlab.io</td>
+            <td><span class="pill pp">관리자</span></td>
+            <td style="color:#8C9C7A;font-size:12px">2026.07.21 09:31 (현재)</td>
+            <td><span class="pill pg">활성</span></td>
+            <td style="text-align:center">
+              <div style="display:flex;gap:5px;justify-content:center">
+                <button class="btg" onclick="openEditStaff('박소영','parksy@muinlab.io','관리자')">수정</button>
+                <button class="btw" onclick="openReset('박소영','staff')">비번 초기화</button>
+              </div>
+            </td>
+          </tr>
+          <!-- 유연준 -->
+          <tr>
+            <td><div style="display:flex;align-items:center;gap:10px"><div class="av av-1">유</div><div style="font-weight:600">유연준</div></div></td>
+            <td style="color:#5A6A48;font-size:12px">yjyu@muinlab.io</td>
+            <td><span class="pill pp">관리자</span></td>
+            <td style="color:#8C9C7A;font-size:12px">2026.07.21 08:15</td>
+            <td><span class="pill pg">활성</span></td>
+            <td style="text-align:center"><div style="display:flex;gap:5px;justify-content:center"><button class="btg" onclick="openEditStaff('유연준','yjyu@muinlab.io','관리자')">수정</button><button class="btw" onclick="openReset('유연준','staff')">비번 초기화</button><button class="btd" onclick="openDeactivate('유연준')">비활성</button></div></td>
+          </tr>
+          <!-- 류기령 -->
+          <tr>
+            <td><div style="display:flex;align-items:center;gap:10px"><div class="av av-2">류</div><div style="font-weight:600">류기령</div></div></td>
+            <td style="color:#5A6A48;font-size:12px">ryu@muinlab.io</td>
+            <td><span class="pill pb">담당자</span></td>
+            <td style="color:#8C9C7A;font-size:12px">2026.07.20 17:42</td>
+            <td><span class="pill pg">활성</span></td>
+            <td style="text-align:center"><div style="display:flex;gap:5px;justify-content:center"><button class="btg" onclick="openEditStaff('류기령','ryu@muinlab.io','담당자')">수정</button><button class="btw" onclick="openReset('류기령','staff')">비번 초기화</button><button class="btd" onclick="openDeactivate('류기령')">비활성</button></div></td>
+          </tr>
+          <!-- 박영욱 -->
+          <tr>
+            <td><div style="display:flex;align-items:center;gap:10px"><div class="av av-3">박</div><div style="font-weight:600">박영욱</div></div></td>
+            <td style="color:#5A6A48;font-size:12px">michael@muinlab.io</td>
+            <td><span class="pill pb">담당자</span></td>
+            <td style="color:#8C9C7A;font-size:12px">2026.07.20 14:08</td>
+            <td><span class="pill pg">활성</span></td>
+            <td style="text-align:center"><div style="display:flex;gap:5px;justify-content:center"><button class="btg" onclick="openEditStaff('박영욱','michael@muinlab.io','담당자')">수정</button><button class="btw" onclick="openReset('박영욱','staff')">비번 초기화</button><button class="btd" onclick="openDeactivate('박영욱')">비활성</button></div></td>
+          </tr>
+          <!-- 최민철 -->
+          <tr>
+            <td><div style="display:flex;align-items:center;gap:10px"><div class="av av-1">최</div><div style="font-weight:600">최민철</div></div></td>
+            <td style="color:#5A6A48;font-size:12px">mcchoi@muinlab.io</td>
+            <td><span class="pill pb">담당자</span></td>
+            <td style="color:#8C9C7A;font-size:12px">2026.07.20 10:55</td>
+            <td><span class="pill pg">활성</span></td>
+            <td style="text-align:center"><div style="display:flex;gap:5px;justify-content:center"><button class="btg" onclick="openEditStaff('최민철','mcchoi@muinlab.io','담당자')">수정</button><button class="btw" onclick="openReset('최민철','staff')">비번 초기화</button><button class="btd" onclick="openDeactivate('최민철')">비활성</button></div></td>
+          </tr>
+          <!-- 신나라 -->
+          <tr>
+            <td><div style="display:flex;align-items:center;gap:10px"><div class="av av-2">신</div><div style="font-weight:600">신나라</div></div></td>
+            <td style="color:#5A6A48;font-size:12px">nara@muinlab.io</td>
+            <td><span class="pill pb">담당자</span></td>
+            <td style="color:#8C9C7A;font-size:12px">2026.07.19 16:30</td>
+            <td><span class="pill pg">활성</span></td>
+            <td style="text-align:center"><div style="display:flex;gap:5px;justify-content:center"><button class="btg" onclick="openEditStaff('신나라','nara@muinlab.io','담당자')">수정</button><button class="btw" onclick="openReset('신나라','staff')">비번 초기화</button><button class="btd" onclick="openDeactivate('신나라')">비활성</button></div></td>
+          </tr>
+          <!-- 신태순 -->
+          <tr>
+            <td><div style="display:flex;align-items:center;gap:10px"><div class="av av-3">신</div><div style="font-weight:600">신태순</div></div></td>
+            <td style="color:#5A6A48;font-size:12px">funkyts@muinlab.io</td>
+            <td><span class="pill pb">담당자</span></td>
+            <td style="color:#8C9C7A;font-size:12px">2026.07.19 11:22</td>
+            <td><span class="pill pg">활성</span></td>
+            <td style="text-align:center"><div style="display:flex;gap:5px;justify-content:center"><button class="btg" onclick="openEditStaff('신태순','funkyts@muinlab.io','담당자')">수정</button><button class="btw" onclick="openReset('신태순','staff')">비번 초기화</button><button class="btd" onclick="openDeactivate('신태순')">비활성</button></div></td>
+          </tr>
+          <!-- 박현규 -->
+          <tr>
+            <td><div style="display:flex;align-items:center;gap:10px"><div class="av av-1">박</div><div style="font-weight:600">박현규</div></div></td>
+            <td style="color:#5A6A48;font-size:12px">leo@muinlab.io</td>
+            <td><span class="pill pb">담당자</span></td>
+            <td style="color:#8C9C7A;font-size:12px">2026.07.18 15:44</td>
+            <td><span class="pill pg">활성</span></td>
+            <td style="text-align:center"><div style="display:flex;gap:5px;justify-content:center"><button class="btg" onclick="openEditStaff('박현규','leo@muinlab.io','담당자')">수정</button><button class="btw" onclick="openReset('박현규','staff')">비번 초기화</button><button class="btd" onclick="openDeactivate('박현규')">비활성</button></div></td>
+          </tr>
+          <!-- 김한준 -->
+          <tr>
+            <td><div style="display:flex;align-items:center;gap:10px"><div class="av av-2">김</div><div style="font-weight:600">김한준</div></div></td>
+            <td style="color:#5A6A48;font-size:12px">hanjun@muinlab.io</td>
+            <td><span class="pill pb">담당자</span></td>
+            <td style="color:#8C9C7A;font-size:12px">2026.07.17 09:18</td>
+            <td><span class="pill pg">활성</span></td>
+            <td style="text-align:center"><div style="display:flex;gap:5px;justify-content:center"><button class="btg" onclick="openEditStaff('김한준','hanjun@muinlab.io','담당자')">수정</button><button class="btw" onclick="openReset('김한준','staff')">비번 초기화</button><button class="btd" onclick="openDeactivate('김한준')">비활성</button></div></td>
+          </tr>
+          <!-- 송영호 -->
+          <tr>
+            <td><div style="display:flex;align-items:center;gap:10px"><div class="av av-3">송</div><div style="font-weight:600">송영호</div></div></td>
+            <td style="color:#5A6A48;font-size:12px">young@muinlab.io</td>
+            <td><span class="pill pb">담당자</span></td>
+            <td style="color:#8C9C7A;font-size:12px">2026.07.16 14:03</td>
+            <td><span class="pill pg">활성</span></td>
+            <td style="text-align:center"><div style="display:flex;gap:5px;justify-content:center"><button class="btg" onclick="openEditStaff('송영호','young@muinlab.io','담당자')">수정</button><button class="btw" onclick="openReset('송영호','staff')">비번 초기화</button><button class="btd" onclick="openDeactivate('송영호')">비활성</button></div></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- 역할 안내 -->
+      <div style="padding:14px 16px;border-top:1px solid #F0F4EC;background:#FAFDF5;display:flex;gap:20px;flex-wrap:wrap">
+        <div style="display:flex;align-items:center;gap:6px">
+          <span class="pill pp" style="font-size:10px">관리자</span>
+          <span style="font-size:11px;color:#5A6A48">모든 메뉴 접근 · 직원 계정 생성 · 데이터 삭제</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px">
+          <span class="pill pb" style="font-size:10px">담당자</span>
+          <span style="font-size:11px;color:#5A6A48">문의 답변 · 서비스 요청 처리 · 공지·자료 등록</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 점주 계정 테이블 (숨김) -->
+    <div id="ownerTable" class="card" style="display:none">
+      <table>
+        <thead><tr>
+          <th>성함</th><th>지점명</th><th>이메일</th><th>마지막 로그인</th><th>비밀번호</th><th>상태</th><th style="text-align:center">관리</th>
+        </tr></thead>
+        <tbody>
+          <tr><td style="font-weight:700">홍길동</td><td style="color:#5A6A48">강남구청역점</td><td style="color:#5A6A48;font-size:12px">hong8282@naver.com</td><td style="color:#8C9C7A;font-size:12px">2026.07.20 09:14</td><td><span class="pill pg">변경완료</span></td><td><span class="pill pg">활성</span></td><td style="text-align:center"><div style="display:flex;gap:5px;justify-content:center"><button class="btg">수정</button><button class="btw" onclick="openReset('홍길동','owner')">비번초기화</button></div></td></tr>
+          <tr><td style="font-weight:700">김민준</td><td style="color:#5A6A48">신촌역점</td><td style="color:#5A6A48;font-size:12px">kjminjun@gmail.com</td><td style="color:#8C9C7A;font-size:12px">2026.07.19 15:32</td><td><span class="pill pg">변경완료</span></td><td><span class="pill pg">활성</span></td><td style="text-align:center"><div style="display:flex;gap:5px;justify-content:center"><button class="btg">수정</button><button class="btw" onclick="openReset('김민준','owner')">비번초기화</button></div></td></tr>
+          <tr><td style="font-weight:700">이서연</td><td style="color:#5A6A48">수원역점</td><td style="color:#5A6A48;font-size:12px">seoyeon82@naver.com</td><td style="color:#8C9C7A;font-size:12px">2026.07.18 11:05</td><td><span class="pill pg">변경완료</span></td><td><span class="pill pg">활성</span></td><td style="text-align:center"><div style="display:flex;gap:5px;justify-content:center"><button class="btg">수정</button><button class="btw" onclick="openReset('이서연','owner')">비번초기화</button></div></td></tr>
+          <tr><td style="font-weight:700">박지현</td><td style="color:#5A6A48">분당정자역점</td><td style="color:#5A6A48;font-size:12px">jh_park21@kakao.com</td><td style="color:#8C9C7A;font-size:12px">2026.07.20 08:47</td><td><span class="pill pg">변경완료</span></td><td><span class="pill pg">활성</span></td><td style="text-align:center"><div style="display:flex;gap:5px;justify-content:center"><button class="btg">수정</button><button class="btw" onclick="openReset('박지현','owner')">비번초기화</button></div></td></tr>
+          <tr><td style="font-weight:700">최준혁</td><td style="color:#5A6A48">인천논현역점</td><td style="color:#5A6A48;font-size:12px">choi_jh99@naver.com</td><td style="color:#8C9C7A;font-size:12px">2026.07.17 14:20</td><td><span class="pill pg">변경완료</span></td><td><span class="pill pg">활성</span></td><td style="text-align:center"><div style="display:flex;gap:5px;justify-content:center"><button class="btg">수정</button><button class="btw" onclick="openReset('최준혁','owner')">비번초기화</button></div></td></tr>
+          <tr><td style="font-weight:700">정다은</td><td style="color:#5A6A48">부산서면점</td><td style="color:#5A6A48;font-size:12px">daeun_j@gmail.com</td><td style="color:#8C9C7A;font-size:12px">2026.07.19 10:55</td><td><span class="pill pg">변경완료</span></td><td><span class="pill pg">활성</span></td><td style="text-align:center"><div style="display:flex;gap:5px;justify-content:center"><button class="btg">수정</button><button class="btw" onclick="openReset('정다은','owner')">비번초기화</button></div></td></tr>
+          <tr><td style="font-weight:700">강민서</td><td style="color:#5A6A48">대전둔산점</td><td style="color:#5A6A48;font-size:12px">minseo_kang@naver.com</td><td style="color:#8C9C7A;font-size:12px">2026.07.16 09:30</td><td><span class="pill pg">변경완료</span></td><td><span class="pill pg">활성</span></td><td style="text-align:center"><div style="display:flex;gap:5px;justify-content:center"><button class="btg">수정</button><button class="btw" onclick="openReset('강민서','owner')">비번초기화</button></div></td></tr>
+          <tr><td style="font-weight:700">윤지호</td><td style="color:#5A6A48">대구동성로점</td><td style="color:#5A6A48;font-size:12px">yooniho@kakao.com</td><td style="color:#8C9C7A;font-size:12px">2026.07.18 16:12</td><td><span class="pill pg">변경완료</span></td><td><span class="pill pg">활성</span></td><td style="text-align:center"><div style="display:flex;gap:5px;justify-content:center"><button class="btg">수정</button><button class="btw" onclick="openReset('윤지호','owner')">비번초기화</button></div></td></tr>
+          <tr><td style="font-weight:700">오하은</td><td style="color:#5A6A48">일산마두역점</td><td style="color:#5A6A48;font-size:12px">haeun_oh@gmail.com</td><td style="color:#8C9C7A;font-size:12px">2026.07.15 13:44</td><td><span class="pill pg">변경완료</span></td><td><span class="pill pg">활성</span></td><td style="text-align:center"><div style="display:flex;gap:5px;justify-content:center"><button class="btg">수정</button><button class="btw" onclick="openReset('오하은','owner')">비번초기화</button></div></td></tr>
+          <tr><td style="font-weight:700">임도윤</td><td style="color:#5A6A48">성수역점</td><td style="color:#5A6A48;font-size:12px">doyun_lim@naver.com</td><td style="color:#8C9C7A;font-size:12px">2026.07.20 07:58</td><td><span class="pill pg">변경완료</span></td><td><span class="pill pg">활성</span></td><td style="text-align:center"><div style="display:flex;gap:5px;justify-content:center"><button class="btg">수정</button><button class="btw" onclick="openReset('임도윤','owner')">비번초기화</button></div></td></tr>
+          <tr><td style="font-weight:700">신아름</td><td style="color:#5A6A48">홍대입구역점</td><td style="color:#5A6A48;font-size:12px">areum_shin@kakao.com</td><td style="color:#8C9C7A;font-size:12px">2026.07.19 18:30</td><td><span class="pill pg">변경완료</span></td><td><span class="pill pg">활성</span></td><td style="text-align:center"><div style="display:flex;gap:5px;justify-content:center"><button class="btg">수정</button><button class="btw" onclick="openReset('신아름','owner')">비번초기화</button></div></td></tr>
+          <tr><td style="font-weight:700">한승우</td><td style="color:#5A6A48">판교역점</td><td style="color:#5A6A48;font-size:12px">sw_han@gmail.com</td><td style="color:#8C9C7A;font-size:12px">2026.07.20 10:02</td><td><span class="pill pg">변경완료</span></td><td><span class="pill pg">활성</span></td><td style="text-align:center"><div style="display:flex;gap:5px;justify-content:center"><button class="btg">수정</button><button class="btw" onclick="openReset('한승우','owner')">비번초기화</button></div></td></tr>
+          <tr><td style="font-weight:700">배수빈</td><td style="color:#5A6A48">구로디지털단지점</td><td style="color:#5A6A48;font-size:12px">subeen_b@naver.com</td><td style="color:#8C9C7A;font-size:12px">2026.07.17 12:19</td><td><span class="pill pg">변경완료</span></td><td><span class="pill pg">활성</span></td><td style="text-align:center"><div style="display:flex;gap:5px;justify-content:center"><button class="btg">수정</button><button class="btw" onclick="openReset('배수빈','owner')">비번초기화</button></div></td></tr>
+          <tr><td style="font-weight:700">남정민</td><td style="color:#5A6A48">광화문점</td><td style="color:#5A6A48;font-size:12px">jm_nam@kakao.com</td><td style="color:#8C9C7A;font-size:12px">2026.07.19 09:41</td><td><span class="pill pg">변경완료</span></td><td><span class="pill pg">활성</span></td><td style="text-align:center"><div style="display:flex;gap:5px;justify-content:center"><button class="btg">수정</button><button class="btw" onclick="openReset('남정민','owner')">비번초기화</button></div></td></tr>
+          <tr><td style="font-weight:700">문서준</td><td style="color:#5A6A48">청주흥덕점</td><td style="color:#5A6A48;font-size:12px">sjun_moon@naver.com</td><td style="color:#8C9C7A;font-size:12px">2026.07.14 11:07</td><td><span class="pill pw">기본값 사용중</span></td><td><span class="pill pg">활성</span></td><td style="text-align:center"><div style="display:flex;gap:5px;justify-content:center"><button class="btg">수정</button><button class="btw" onclick="openReset('문서준','owner')">비번초기화</button></div></td></tr>
+          <tr><td style="font-weight:700">이채원</td><td style="color:#5A6A48">광주상무점</td><td style="color:#5A6A48;font-size:12px">chaewon_lee@gmail.com</td><td style="color:#8C9C7A;font-size:12px">2026.07.18 14:55</td><td><span class="pill pg">변경완료</span></td><td><span class="pill pg">활성</span></td><td style="text-align:center"><div style="display:flex;gap:5px;justify-content:center"><button class="btg">수정</button><button class="btw" onclick="openReset('이채원','owner')">비번초기화</button></div></td></tr>
+          <tr><td style="font-weight:700">조현우</td><td style="color:#5A6A48">울산신정점</td><td style="color:#5A6A48;font-size:12px">hw_cho@naver.com</td><td style="color:#8C9C7A;font-size:12px">2026.07.04 10:23</td><td><span class="pill pw">기본값 사용중</span></td><td><span class="pill pg">활성</span></td><td style="text-align:center"><div style="display:flex;gap:5px;justify-content:center"><button class="btg">수정</button><button class="btw" onclick="openReset('조현우','owner')">비번초기화</button></div></td></tr>
+          <tr><td style="font-weight:700">권나현</td><td style="color:#5A6A48">전주효자점</td><td style="color:#5A6A48;font-size:12px">nahyun_k@kakao.com</td><td style="color:#8C9C7A;font-size:12px">2026.07.15 16:44</td><td><span class="pill pw">기본값 사용중</span></td><td><span class="pill pg">활성</span></td><td style="text-align:center"><div style="display:flex;gap:5px;justify-content:center"><button class="btg">수정</button><button class="btw" onclick="openReset('권나현','owner')">비번초기화</button></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</div>
+
+<!-- 직원 계정 생성 모달 -->
+<div id="createStaffModal" class="overlay" onclick="if(event.target===this)closeCreate()">
+  <div class="modal">
+    <h3>직원 계정 생성</h3>
+    <div class="sub">생성 후 직원에게 이메일과 임시 비밀번호를 전달해주세요.</div>
+    <div class="frow">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div class="fitem">
+          <label>성함 *</label>
+          <input type="text" placeholder="직원 성함">
+        </div>
+        <div class="fitem">
+          <label>역할 *</label>
+          <select>
+            <option value="">선택</option>
+            <option value="관리자">관리자</option>
+            <option value="담당자">담당자</option>
+          </select>
+        </div>
+      </div>
+      <div class="fitem">
+        <label>이메일 (로그인 ID) *</label>
+        <input type="email" placeholder="예) name@muinlab.io">
+      </div>
+    </div>
+    <div class="note-box">
+      <div style="font-weight:700;color:#253016;margin-bottom:4px">🔑 임시 비밀번호: Welcome1!</div>
+      계정 생성 후 직원이 첫 로그인 시 비밀번호를 변경하도록 안내해주세요.
+      <div style="margin-top:8px;padding-top:8px;border-top:1px solid #D8E0CF;color:#8C9C7A">
+        ⚠️ <strong style="color:#5A6A48">관리자</strong>는 직원 계정 생성·삭제 및 데이터 삭제 권한을 갖습니다.
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button class="btg btn" onclick="closeCreate()" style="padding:9px 18px;font-size:13px">취소</button>
+      <button class="btn btp" onclick="doCreate()">계정 생성</button>
+    </div>
+  </div>
+</div>
+
+<!-- 점주 계정 생성 모달 -->
+<div id="createOwnerModal" class="overlay" onclick="if(event.target===this)closeCreate()">
+  <div class="modal">
+    <h3>점주 계정 생성</h3>
+    <div class="sub">생성 후 점주에게 이메일과 초기 비밀번호를 전달해주세요.</div>
+    <div class="frow">
+      <div class="fitem">
+        <label>지점 *</label>
+        <select style="width:100%">
+          <option value="">지점 선택</option>
+          <option>강남구청역점</option><option>신촌역점</option><option>수원역점</option>
+        </select>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div class="fitem"><label>성함 *</label><input type="text" placeholder="점주 성함"></div>
+        <div class="fitem"><label>연락처</label><input type="text" placeholder="010-0000-0000"></div>
+      </div>
+      <div class="fitem">
+        <label>이메일 (로그인 ID) *</label>
+        <input type="email" placeholder="점주 이메일 주소">
+      </div>
+    </div>
+    <div class="note-box">
+      <div style="font-weight:700;color:#253016;margin-bottom:4px">🔑 초기 비밀번호: 123456</div>
+      계정 생성 후 점주가 첫 로그인 시 비밀번호를 변경하도록 안내해주세요.
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button class="btg btn" onclick="closeCreate()" style="padding:9px 18px;font-size:13px">취소</button>
+      <button class="btn btp" onclick="doCreate()">계정 생성</button>
+    </div>
+  </div>
+</div>
+
+<!-- 직원 수정 모달 -->
+<div id="editStaffModal" class="overlay" onclick="if(event.target===this)closeEditStaff()">
+  <div class="modal">
+    <h3>직원 정보 수정</h3>
+    <div class="sub" id="editStaffSub"></div>
+    <div class="frow">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div class="fitem"><label>성함</label><input type="text" id="editName"></div>
+        <div class="fitem">
+          <label>역할</label>
+          <select id="editRole">
+            <option value="관리자">관리자</option>
+            <option value="담당자">담당자</option>
+          </select>
+        </div>
+      </div>
+      <div class="fitem"><label>이메일</label><input type="email" id="editEmail"></div>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button class="btg btn" onclick="closeEditStaff()" style="padding:9px 18px;font-size:13px">취소</button>
+      <button class="btn btp" onclick="doEditStaff()">저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- 비밀번호 초기화 모달 -->
+<div id="resetModal" class="overlay" onclick="if(event.target===this)closeReset()">
+  <div class="reset-modal">
+    <div style="width:48px;height:48px;background:#FEF9C3;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px">
+      <svg width="22" height="22" fill="none" viewBox="0 0 24 24"><path d="M12 9v4M12 17h.01M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" stroke="#D97706" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    <div style="font-size:15px;font-weight:800;color:#1A2012;margin-bottom:6px">비밀번호를 초기화할까요?</div>
+    <div style="font-size:13px;color:#5A6A48;line-height:1.6;margin-bottom:4px"><span id="resetName" style="font-weight:700"></span>의 비밀번호가</div>
+    <div id="resetPwDisplay" style="font-size:20px;font-weight:900;color:#253016;margin-bottom:6px">123456</div>
+    <div style="font-size:13px;color:#5A6A48;line-height:1.6;margin-bottom:22px">으로 초기화됩니다.</div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btg" onclick="closeReset()" style="flex:1;padding:11px;font-size:13px;justify-content:center">취소</button>
+      <button class="btn btp" onclick="doReset()" style="flex:1;justify-content:center">초기화</button>
+    </div>
+  </div>
+</div>
+
+<!-- 비활성 확인 모달 -->
+<div id="deactivateModal" class="overlay" onclick="if(event.target===this)document.getElementById('deactivateModal').style.display='none'">
+  <div class="reset-modal">
+    <div style="width:48px;height:48px;background:#FEF2F2;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px">
+      <svg width="22" height="22" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="#DC2626" stroke-width="1.8"/><path d="M15 9l-6 6M9 9l6 6" stroke="#DC2626" stroke-width="1.8" stroke-linecap="round"/></svg>
+    </div>
+    <div style="font-size:15px;font-weight:800;color:#1A2012;margin-bottom:6px">계정을 비활성화할까요?</div>
+    <div style="font-size:13px;color:#5A6A48;line-height:1.6;margin-bottom:22px"><span id="deactivateName" style="font-weight:700"></span> 직원은 더 이상 어드민에 로그인할 수 없습니다.</div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btg" onclick="document.getElementById('deactivateModal').style.display='none'" style="flex:1;padding:11px;font-size:13px;justify-content:center">취소</button>
+      <button class="btn btd" onclick="document.getElementById('deactivateModal').style.display='none';alert('계정이 비활성화되었습니다.')" style="flex:1;justify-content:center;background:#DC2626;color:#fff">비활성화</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let curTab = 'staff';
+
+function switchTab(tab){
+  curTab = tab;
+  document.getElementById('tabStaff').classList.toggle('on', tab==='staff');
+  document.getElementById('tabOwner').classList.toggle('on', tab==='owner');
+  document.getElementById('staffTable').style.display = tab==='staff' ? '' : 'none';
+  document.getElementById('ownerTable').style.display = tab==='owner' ? '' : 'none';
+  document.getElementById('filterRole').style.display = tab==='staff' ? '' : 'none';
+  document.getElementById('createBtnText').textContent = tab==='staff' ? '직원 계정 생성' : '점주 계정 생성';
+  document.getElementById('phSub').textContent = tab==='staff' ? '직원 10명 · 점주 38명' : '점주 38명 · 직원 10명';
+}
+
+function openCreate(){
+  const id = curTab==='staff' ? 'createStaffModal' : 'createOwnerModal';
+  const m = document.getElementById(id);
+  m.style.display='flex'; m.style.alignItems='center'; m.style.justifyContent='center';
+}
+function closeCreate(){
+  document.getElementById('createStaffModal').style.display='none';
+  document.getElementById('createOwnerModal').style.display='none';
+}
+function doCreate(){
+  const type = curTab==='staff' ? '직원' : '점주';
+  alert(`${type} 계정이 생성되었습니다.`);
+  closeCreate();
+}
+
+function openEditStaff(name, email, role){
+  document.getElementById('editStaffSub').textContent = name + ' 직원 정보를 수정합니다.';
+  document.getElementById('editName').value = name;
+  document.getElementById('editEmail').value = email;
+  document.getElementById('editRole').value = role;
+  const m = document.getElementById('editStaffModal');
+  m.style.display='flex'; m.style.alignItems='center'; m.style.justifyContent='center';
+}
+function closeEditStaff(){document.getElementById('editStaffModal').style.display='none';}
+function doEditStaff(){alert('직원 정보가 수정되었습니다.');closeEditStaff();}
+
+function openReset(name, type){
+  document.getElementById('resetName').textContent = name;
+  document.getElementById('resetPwDisplay').textContent = type==='staff' ? 'Welcome1!' : '123456';
+  const m = document.getElementById('resetModal');
+  m.style.display='flex'; m.style.alignItems='center'; m.style.justifyContent='center';
+}
+function closeReset(){document.getElementById('resetModal').style.display='none';}
+function doReset(){alert('비밀번호가 초기화되었습니다.');closeReset();}
+
+function openDeactivate(name){
+  document.getElementById('deactivateName').textContent = name;
+  const m = document.getElementById('deactivateModal');
+  m.style.display='flex'; m.style.alignItems='center'; m.style.justifyContent='center';
+}
+</script>
+</body>
+</html>

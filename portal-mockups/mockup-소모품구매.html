@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>앤딩 오너 — 소모품 구매</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+  *, *::before, *::after { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body { font-family: 'Pretendard', sans-serif; background: #CDD6C2; min-height: 100vh; display: flex; justify-content: center; padding: 32px 0; }
+  .phone { width: 375px; background: #E8EDE1; min-height: 100vh; position: relative; box-shadow: 0 20px 70px rgba(0,0,0,0.22); }
+
+  .search-wrap { position: relative; }
+  .search-input { width: 100%; background: #fff; border: 1.5px solid #D8E0CF; border-radius: 12px; padding: 10px 14px 10px 38px; font-size: 13px; font-family: 'Pretendard', sans-serif; color: #1A2012; outline: none; }
+  .search-input::placeholder { color: #A8B89A; }
+  .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 14px; }
+
+  .cat-btn { display: flex; flex-direction: column; align-items: center; justify-content: space-between; gap: 8px; background: #fff; border-radius: 16px; padding: 14px 8px 13px; box-shadow: 0 1px 2px rgba(30,40,18,0.05), 0 4px 14px rgba(30,40,18,0.07); cursor: pointer; border: 2px solid transparent; transition: all 0.15s; }
+  .cat-btn.active { background: #BFCEA8; }
+  .cat-icon { width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; background: #EEF4E8; }
+  .item-price { display: none; }
+  .cat-label { font-size: 11px; font-weight: 700; color: #2A3519; text-align: center; line-height: 1.3; }
+
+  .item-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; border-bottom: 1px solid #F0F4EC; }
+  .item-row:last-child { border-bottom: none; }
+  .item-name { font-size: 12px; font-weight: 600; color: #1A2012; flex: 1; padding-right: 8px; }
+  .item-info { display: none; }
+  .item-price { font-size: 12px; font-weight: 700; color: #3A4D28; white-space: nowrap; }
+  .btn-buy { display: inline-flex; align-items: center; gap: 3px; background: #3A4D28; color: #fff; font-size: 10px; font-weight: 700; padding: 4px 8px; border-radius: 7px; text-decoration: none; white-space: nowrap; margin-left: 8px; }
+
+  .tab-bar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 375px; background: rgba(255,255,255,0.93); backdrop-filter: blur(16px); border-top: 1px solid rgba(0,0,0,0.06); display: flex; z-index: 50; }
+  .tab-item { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 10px 0 9px; gap: 3px; text-decoration: none; }
+  .tab-pip { width: 20px; height: 3px; border-radius: 99px; background: #253016; margin-bottom: 2px; }
+
+  .panel { display: none; }
+  .panel.active { display: block; }
+</style>
+</head>
+<body>
+<div class="phone pb-28">
+
+  <!-- 헤더 -->
+  <div style="background:#253016;padding:13px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:40">
+    <span style="color:white;font-size:16px;font-weight:700;letter-spacing:-0.3px">소모품 구매</span>
+    <div style="display:flex;align-items:center;gap:10px">
+      <span style="color:#E4FD97;font-size:12px;font-weight:700">강남구청역점</span>
+      <button style="width:30px;height:30px;background:rgba(255,255,255,0.1);border-radius:8px;display:flex;align-items:center;justify-content:center;border:none;cursor:pointer">
+        <span style="color:rgba(255,255,255,0.65);font-size:15px">⚙</span>
+      </button>
+    </div>
+  </div>
+
+  <div style="padding:14px 16px 0;display:flex;flex-direction:column;gap:12px">
+
+    <!-- 검색창 -->
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input class="search-input" type="text" placeholder="소모품 검색 (예: 종이컵, 건전지)">
+    </div>
+
+    <!-- 원두 주문 (컴팩트) -->
+    <div style="background:#253016;border-radius:12px;padding:10px 14px;display:flex;align-items:center;gap:10px">
+      <span style="font-size:16px;flex-shrink:0">☕</span>
+      <p style="color:#E4FD97;font-size:12px;font-weight:700;flex:1;letter-spacing:-0.2px">원두 주문</p>
+      <a href="#" style="font-size:10px;font-weight:700;color:#1A2012;background:#E4FD97;padding:5px 10px;border-radius:7px;text-decoration:none;white-space:nowrap;flex-shrink:0">주문하기 →</a>
+    </div>
+
+    <!-- 카테고리 그리드 -->
+    <div>
+      <p style="font-size:10.5px;font-weight:700;color:#8C9C7A;letter-spacing:0.9px;margin-bottom:10px">카테고리</p>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:7px">
+        <div class="cat-btn active" onclick="showCat('cafe')">
+          <div class="cat-icon">☕</div>
+          <span class="cat-label">카페<br>테리아</span>
+        </div>
+        <div class="cat-btn" onclick="showCat('study')">
+          <div class="cat-icon">📚</div>
+          <span class="cat-label">스터디<br>공간</span>
+        </div>
+        <div class="cat-btn" onclick="showCat('clean')">
+          <div class="cat-icon">🧹</div>
+          <span class="cat-label">청소<br>용품</span>
+        </div>
+        <div class="cat-btn" onclick="showCat('door')">
+          <div class="cat-icon">🚪</div>
+          <span class="cat-label">출입구</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 아이템 패널들 -->
+    <div>
+
+      <!-- 카페테리아 -->
+      <div id="panel-cafe" class="panel active" style="background:#fff;border-radius:16px;box-shadow:0 1px 2px rgba(30,40,18,0.05),0 4px 14px rgba(30,40,18,0.07);overflow:hidden">
+
+        <div class="item-row"><div><p class="item-name">카페시럽 1.5L</p><p class="item-info">시럽펌프 포함</p></div><div style="display:flex;align-items:center"><span class="item-price">11,900원</span><a href="#" class="btn-buy">구매</a></div></div>
+        <div class="item-row"><div><p class="item-name">커피스틱</p><p class="item-info">1,000개입/봉지</p></div><div style="display:flex;align-items:center"><span class="item-price">11,890원</span><a href="#" class="btn-buy">구매</a></div></div>
+        <div class="item-row"><div><p class="item-name">복숭아 아이스티</p><p class="item-info">14g × 80개입 2박스</p></div><div style="display:flex;align-items:center"><span class="item-price">13,410원</span><a href="#" class="btn-buy">구매</a></div></div>
+        <div class="item-row"><div><p class="item-name">오리지날 커피믹스</p><p class="item-info">180개입 1박스</p></div><div style="display:flex;align-items:center"><span class="item-price">18,440원</span><a href="#" class="btn-buy">구매</a></div></div>
+        <div class="item-row"><div><p class="item-name">240ml 종이컵</p><p class="item-info">1,000개/박스</p></div><div style="display:flex;align-items:center"><span class="item-price">28,910원</span><a href="#" class="btn-buy">구매</a></div></div>
+        <div class="item-row"><div><p class="item-name">180ml 종이컵</p><p class="item-info">2,000개/박스</p></div><div style="display:flex;align-items:center"><span class="item-price">22,990원</span><a href="#" class="btn-buy">구매</a></div></div>
+        <div class="item-row"><div><p class="item-name">둥글레차</p><p class="item-info">150개입 2박스</p></div><div style="display:flex;align-items:center"><span class="item-price">14,460원</span><a href="#" class="btn-buy">구매</a></div></div>
+        <div class="item-row"><div><p class="item-name">현미녹차</p><p class="item-info">150개입 2박스</p></div><div style="display:flex;align-items:center"><span class="item-price">10,150원</span><a href="#" class="btn-buy">구매</a></div></div>
+        <div class="item-row"><div><p class="item-name">폴로사탕</p><p class="item-info">900g/2봉</p></div><div style="display:flex;align-items:center"><span class="item-price">23,500원</span><a href="#" class="btn-buy">구매</a></div></div>
+        <div class="item-row"><div><p class="item-name">비타C캔디</p><p class="item-info">2kg/봉지</p></div><div style="display:flex;align-items:center"><span class="item-price">13,680원</span><a href="#" class="btn-buy">구매</a></div></div>
+        <div class="item-row"><div><p class="item-name">스탠 스푼</p><p class="item-info">6호</p></div><div style="display:flex;align-items:center"><span class="item-price">8,400원</span><a href="#" class="btn-buy">구매</a></div></div>
+        <div class="item-row"><div><p class="item-name">수세미</p><p class="item-info">9개 세트</p></div><div style="display:flex;align-items:center"><span class="item-price">13,500원</span><a href="#" class="btn-buy">구매</a></div></div>
+        <div class="item-row"><div><p class="item-name">극세사 손걸레</p><p class="item-info">5개 세트</p></div><div style="display:flex;align-items:center"><span class="item-price">5,000원</span><a href="#" class="btn-buy">구매</a></div></div>
+        <div class="item-row"><div><p class="item-name">주방세제</p><p class="item-info">2개 세트</p></div><div style="display:flex;align-items:center"><span class="item-price">5,690원</span><a href="#" class="btn-buy">구매</a></div></div>
+        <div class="item-row"><div><p class="item-name">고무장갑 대</p><p class="item-info">5개 세트</p></div><div style="display:flex;align-items:center"><span class="item-price">9,200원</span><a href="#" class="btn-buy">구매</a></div></div>
+      </div>
+
+      <!-- 스터디존 -->
+      <div id="panel-study" class="panel" style="background:#fff;border-radius:16px;box-shadow:0 1px 2px rgba(30,40,18,0.05),0 4px 14px rgba(30,40,18,0.07);overflow:hidden">
+        <div class="item-row"><div><p class="item-name">포스트잇</p><p class="item-info">20개 세트</p></div><div style="display:flex;align-items:center"><span class="item-price">12,480원</span><a href="#" class="btn-buy">구매</a></div></div>
+        <div class="item-row"><div><p class="item-name">샤프</p><p class="item-info">12개 세트</p></div><div style="display:flex;align-items:center"><span class="item-price">5,380원</span><a href="#" class="btn-buy">구매</a></div></div>
+        <div class="item-row"><div><p class="item-name">샤프심</p><p class="item-info">12개 세트</p></div><div style="display:flex;align-items:center"><span class="item-price">4,550원</span><a href="#" class="btn-buy">구매</a></div></div>
+        <div class="item-row"><div><p class="item-name">지우개</p><p class="item-info">60개 세트</p></div><div style="display:flex;align-items:center"><span class="item-price">14,100원</span><a href="#" class="btn-buy">구매</a></div></div>
+        <div class="item-row"><div><p class="item-name">형광펜</p><p class="item-info">24개 세트</p></div><div style="display:flex;align-items:center"><span class="item-price">5,560원</span><a href="#" class="btn-buy">구매</a></div></div>
+        <div class="item-row"><div><p class="item-name">테이프</p><p class="item-info">스카치 5개 세트</p></div><div style="display:flex;align-items:center"><span class="item-price">11,750원</span><a href="#" class="btn-buy">구매</a></div></div>
+        <div class="item-row"><div><p class="item-name">이어플러그</p><p class="item-info">100개입</p></div><div style="display:flex;align-items:center"><span class="item-price">9,890원</span><a href="#" class="btn-buy">구매</a></div></div>
+        <div class="item-row"><div><p class="item-name">일회용 마스크</p><p class="item-info">100개입</p></div><div style="display:flex;align-items:center"><span class="item-price">9,890원</span><a href="#" class="btn-buy">구매</a></div></div>
+        <div class="item-row"><div><p class="item-name">대용량 머리끈</p><p class="item-info">200개 세트</p></div><div style="display:flex;align-items:center"><span class="item-price">9,900원</span><a href="#" class="btn-buy">구매</a></div></div>
+        <div class="item-row"><div><p class="item-name">담요</p><p class="item-info"></p></div><div style="display:flex;align-items:center"><span class="item-price">6,900원</span><a href="#" class="btn-buy">구매</a></div></div>
+        <div class="item-row"><div><p class="item-name">알파 103 독서대</p><p class="item-info">407×268mm</p></div><div style="display:flex;align-items:center"><span class="item-price">14,700원</span><a href="#" class="btn-buy">구매</a></div></div>
+        <div class="item-row"><div><p class="item-name">나이스 통상 독서대</p><p class="item-info">307×210mm · 당일배송X</p></div><div style="display:flex;align-items:center"><span class="item-price">10,460원</span><a href="#" class="btn-buy">구매</a></div></div>
+        <div class="item-row"><div><p class="item-name">C타입 충전기</p><p class="item-info">케이블 세트 2개</p></div><div style="display:flex;align-items:center"><span class="item-price">9,900원</span><a href="#" class="btn-buy">구매</a></div></div>
+        <div class="item-row"><div><p class="item-name">라이트닝 충전기</p><p class="item-info">아이폰용 2개 세트</p></div><div style="display:flex;align-items:center"><span class="item-price">8,429원</span><a href="#" class="btn-buy">구매</a></div></div>
+        <div class="item-row"><div><p class="item-name">무소음 마우스</p><p class="item-info"></p></div><div style="display:flex;align-items:center"><span class="item-price">11,240원</span><a href="#" class="btn-buy">구매</a></div></div>
+        <div class="item-row"><div><p class="item-name">무소음 키보드</p><p class="item-info">색상 선택</p></div><div style="display:flex;align-items:center"><span class="item-price">22,240원</span><a href="#" class="btn-buy">구매</a></div></div>
+        <div class="item-row"><div><p class="item-name">의자커버 테니스공</p><p class="item-info">20개입 (의자 1개당 2개)</p></div><div style="display:flex;align-items:center"><span class="item-price">13,370원</span><a href="#" class="btn-buy">구매</a></div></div>
+        <div class="item-row"><div><p class="item-name">A4 용지</p><p class="item-info">2,500매/박스</p></div><div style="display:flex;align-items:center"><span class="item-price">20,240원</span><a href="#" class="btn-buy">구매</a></div></div>
+        <div class="item-row"><div><p class="item-name">A3 용지</p><p class="item-info">1,250매/2박스 · 당일배송X</p></div><div style="display:flex;align-items:center"><span class="item-price">50,440원</span><a href="#" class="btn-buy">구매</a></div></div>
+        <div class="item-row"><div><p class="item-name">건전지 (AA, AAA)</p><p class="item-info">세트 1박스</p></div><div style="display:flex;align-items:center"><span class="item-price">18,490원</span><a href="#" class="btn-buy">구매</a></div></div>
+        <div class="item-row"><div><p class="item-name">보드마카 3색</p><p class="item-info">12p</p></div><div style="display:flex;align-items:center"><span class="item-price">4,470원</span><a href="#" class="btn-buy">구매</a></div></div>
+        <div class="item-row"><div><p class="item-name">보드마카 지우개</p><p class="item-info">10p</p></div><div style="display:flex;align-items:center"><span class="item-price">6,430원</span><a href="#" class="btn-buy">구매</a></div></div>
+        <div class="item-row"><div><p class="item-name">제본용 스테이플러</p><p class="item-info"></p></div><div style="display:flex;align-items:center"><span class="item-price">19,550원</span><a href="#" class="btn-buy">구매</a></div></div>
+        <div class="item-row"><div><p class="item-name">손소독제</p><p class="item-info">500ml × 3 · 당일배송X</p></div><div style="display:flex;align-items:center"><span class="item-price">11,280원</span><a href="#" class="btn-buy">구매</a></div></div>
+        <div class="item-row"><div><p class="item-name">반창고 혼합형</p><p class="item-info">3개 세트</p></div><div style="display:flex;align-items:center"><span class="item-price">5,470원</span><a href="#" class="btn-buy">구매</a></div></div>
+        <div class="item-row"><div><p class="item-name">마데카솔</p><p class="item-info">3개 세트</p></div><div style="display:flex;align-items:center"><span class="item-price">11,960원</span><a href="#" class="btn-buy">구매</a></div></div>
+        <div class="item-row"><div><p class="item-name">방석</p><p class="item-info">메쉬커버 메모리폼</p></div><div style="display:flex;align-items:center"><span class="item-price">12,140원</span><a href="#" class="btn-buy">구매</a></div></div>
+        <div class="item-row"><div><p class="item-name">멀티탭</p><p class="item-info"></p></div><div style="display:flex;align-items:center"><span class="item-price">12,900원</span><a href="#" class="btn-buy">구매</a></div></div>
+        <div class="item-row"><div><p class="item-name">32인치 모니터</p><p class="item-info"></p></div><div style="display:flex;align-items:center"><span class="item-price">189,000원</span><a href="#" class="btn-buy">구매</a></div></div>
+        <div class="item-row"><div><p class="item-name">모니터 브라켓</p><p class="item-info">인테리어 작업 시 설치</p></div><div style="display:flex;align-items:center"><span class="item-price">8,800원</span><a href="#" class="btn-buy">구매</a></div></div>
+        <div class="item-row"><div><p class="item-name">스위치허브 16포트</p><p class="item-info">ipTIME SG16A-mini</p></div><div style="display:flex;align-items:center"><span class="item-price">65,900원</span><a href="#" class="btn-buy">구매</a></div></div>
+      </div>
+
+      <!-- 청소용품 -->
+      <div id="panel-clean" class="panel" style="background:#fff;border-radius:16px;box-shadow:0 1px 2px rgba(30,40,18,0.05),0 4px 14px rgba(30,40,18,0.07);overflow:hidden">
+        <div class="item-row"><div><p class="item-name">클래식 물티슈</p><p class="item-info">100매 × 20개 세트</p></div><div style="display:flex;align-items:center"><span class="item-price">15,990원</span><a href="#" class="btn-buy">구매</a></div></div>
+        <div class="item-row"><div><p class="item-name">점보롤</p><p class="item-info">8롤 2겹</p></div><div style="display:flex;align-items:center"><span class="item-price">38,490원</span><a href="#" class="btn-buy">구매</a></div></div>
+        <div class="item-row"><div><p class="item-name">재활용 배접봉투 50L</p><p class="item-info">100개 세트</p></div><div style="display:flex;align-items:center"><span class="item-price">9,500원</span><a href="#" class="btn-buy">구매</a></div></div>
+        <div class="item-row"><div><p class="item-name">아이깨끗해 손세정제</p><p class="item-info">490ml × 3개</p></div><div style="display:flex;align-items:center"><span class="item-price">14,390원</span><a href="#" class="btn-buy">구매</a></div></div>
+        <div class="item-row"><div><p class="item-name">물걸레 밀대 세트</p><p class="item-info"></p></div><div style="display:flex;align-items:center"><span class="item-price">11,570원</span><a href="#" class="btn-buy">구매</a></div></div>
+        <div class="item-row"><div><p class="item-name">쓰레기통</p><p class="item-info">7호 · 당일배송X</p></div><div style="display:flex;align-items:center"><span class="item-price">13,500원</span><a href="#" class="btn-buy">구매</a></div></div>
+        <div class="item-row"><div><p class="item-name">빗자루</p><p class="item-info">매장 사용 강추</p></div><div style="display:flex;align-items:center"><span class="item-price">20,500원</span><a href="#" class="btn-buy">구매</a></div></div>
+        <div class="item-row"><div><p class="item-name">물기제거</p><p class="item-info"></p></div><div style="display:flex;align-items:center"><span class="item-price">2,800원</span><a href="#" class="btn-buy">구매</a></div></div>
+        <div class="item-row"><div><p class="item-name">간이 사다리</p><p class="item-info">2단/3단 (천장 높이 확인)</p></div><div style="display:flex;align-items:center"><span class="item-price">35,900원</span><a href="#" class="btn-buy">구매</a></div></div>
+        <div class="item-row"><div><p class="item-name">분리수거 스티커</p><p class="item-info"></p></div><div style="display:flex;align-items:center"><span class="item-price">9,000원</span><a href="#" class="btn-buy">구매</a></div></div>
+        <div class="item-row"><div><p class="item-name">전기 파리채</p><p class="item-info"></p></div><div style="display:flex;align-items:center"><span class="item-price">9,900원</span><a href="#" class="btn-buy">구매</a></div></div>
+        <div class="item-row"><div><p class="item-name">바퀴벌레약 (맥스포스)</p><p class="item-info"></p></div><div style="display:flex;align-items:center"><span class="item-price">19,000원</span><a href="#" class="btn-buy">구매</a></div></div>
+      </div>
+
+      <!-- 출입구 -->
+      <div id="panel-door" class="panel" style="background:#fff;border-radius:16px;box-shadow:0 1px 2px rgba(30,40,18,0.05),0 4px 14px rgba(30,40,18,0.07);overflow:hidden">
+        <div class="item-row"><div><p class="item-name">올리빙 우산꽂이</p><p class="item-info">양산 2구 포함 · 당일배송X</p></div><div style="display:flex;align-items:center"><span class="item-price">23,900원</span><a href="#" class="btn-buy">구매</a></div></div>
+        <div class="item-row"><div><p class="item-name">비상용 우산</p><p class="item-info"></p></div><div style="display:flex;align-items:center"><span class="item-price">1,400원</span><a href="#" class="btn-buy">구매</a></div></div>
+        <div class="item-row"><div><p class="item-name">페브리즈</p><p class="item-info">360ml × 3개</p></div><div style="display:flex;align-items:center"><span class="item-price">13,670원</span><a href="#" class="btn-buy">구매</a></div></div>
+        <div class="item-row"><div><p class="item-name">방향제 자동분사기</p><p class="item-info"></p></div><div style="display:flex;align-items:center"><span class="item-price">13,850원</span><a href="#" class="btn-buy">구매</a></div></div>
+        <div class="item-row"><div><p class="item-name">소화기</p><p class="item-info">SW제조사 · 바닥면적 33㎡ 이상 설치</p></div><div style="display:flex;align-items:center"><span class="item-price">17,800원</span><a href="#" class="btn-buy">구매</a></div></div>
+        <div class="item-row"><div><p class="item-name">소화기 가리개</p><p class="item-info">포맥스</p></div><div style="display:flex;align-items:center"><span class="item-price">15,000원</span><a href="#" class="btn-buy">구매</a></div></div>
+        <div class="item-row"><div><p class="item-name">키오스크 영수증함</p><p class="item-info">10cm</p></div><div style="display:flex;align-items:center"><span class="item-price">9,900원</span><a href="#" class="btn-buy">구매</a></div></div>
+      </div>
+
+    </div>
+
+    <!-- 소모품 추가 요청 -->
+    <div style="padding:4px 0 8px;text-align:center">
+      <a href="mockup-문의목록.html" style="font-size:11px;color:#8C9C7A;text-decoration:none">필요한 소모품이 없나요? <span style="color:#3A4D28;font-weight:700;text-decoration:underline">게시판 요청 →</span></a>
+    </div>
+
+  </div>
+
+  <!-- 하단 탭바 -->
+  <div class="tab-bar">
+    <a href="mockup-홈-v2.html" class="tab-item">
+      <div style="height:3px;margin-bottom:2px"></div>
+      <span style="font-size:18px">🏠</span>
+      <span style="font-size:9.5px;font-weight:500;color:#8C9C7A">홈</span>
+    </a>
+    <a href="mockup-공지목록.html" class="tab-item">
+      <div style="height:3px;margin-bottom:2px"></div>
+      <span style="font-size:18px">📢</span>
+      <span style="font-size:9.5px;font-weight:500;color:#8C9C7A">공지</span>
+    </a>
+    <a href="mockup-자료실.html" class="tab-item">
+      <div style="height:3px;margin-bottom:2px"></div>
+      <span style="font-size:18px">📁</span>
+      <span style="font-size:9.5px;font-weight:500;color:#8C9C7A">자료실</span>
+    </a>
+    <a href="mockup-문의목록.html" class="tab-item">
+      <div style="height:3px;margin-bottom:2px"></div>
+      <span style="font-size:18px">💬</span>
+      <span style="font-size:9.5px;font-weight:500;color:#8C9C7A">문의</span>
+    </a>
+  </div>
+
+</div>
+<script>
+function showCat(key) {
+  document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+  document.getElementById('panel-' + key).classList.add('active');
+}
+</script>
+</body>
+</html>

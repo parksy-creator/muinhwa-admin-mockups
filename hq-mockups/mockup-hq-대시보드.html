@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1280,initial-scale=1">
+<title>본사 어드민 — 대시보드</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+*{font-family:'Pretendard',-apple-system,sans-serif;box-sizing:border-box;margin:0;padding:0}
+body{background:#E8EDE1;color:#1A2012;min-height:100vh;min-width:1080px}
+.sb{width:220px;background:#253016;height:100vh;position:fixed;left:0;top:0;display:flex;flex-direction:column;z-index:100}
+.sb-logo{padding:18px 16px 14px;border-bottom:1px solid rgba(255,255,255,0.1);display:flex;align-items:center;gap:10px;flex-shrink:0}
+.sb-icon{width:34px;height:34px;background:#E4FD97;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sb-nav{flex:1;padding:8px;overflow-y:auto}
+.sb-sec{font-size:10px;color:rgba(255,255,255,0.35);padding:12px 10px 4px;letter-spacing:.8px;font-weight:700;text-transform:uppercase}
+.ni{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:9px;color:rgba(255,255,255,0.6);font-size:13px;font-weight:500;cursor:pointer;text-decoration:none;transition:background .15s}
+.ni:hover{background:rgba(255,255,255,0.07);color:#fff}
+.ni.on{background:rgba(228,253,151,0.15);color:#E4FD97;font-weight:700}
+.sb-user{padding:12px 14px;border-top:1px solid rgba(255,255,255,0.1);display:flex;align-items:center;gap:9px;flex-shrink:0}
+.sb-av{width:30px;height:30px;background:rgba(228,253,151,0.18);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.main{margin-left:220px;min-height:100vh}
+.ph{background:#fff;border-bottom:1px solid #E0E8D5;padding:0 28px;height:58px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+.ph-title{font-size:17px;font-weight:800;color:#1A2012}
+.ph-sub{font-size:11px;color:#8C9C7A;margin-top:1px}
+.content{padding:24px 28px}
+.krow{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+.kpi{background:#fff;border-radius:15px;padding:18px 20px;box-shadow:0 1px 3px rgba(30,40,18,0.05),0 4px 10px rgba(30,40,18,0.04)}
+.kl{font-size:11px;font-weight:700;color:#8C9C7A;letter-spacing:.3px;margin-bottom:8px}
+.kv{font-size:28px;font-weight:900;color:#1A2012;line-height:1}
+.ku{font-size:12px;color:#8C9C7A;font-weight:500;margin-left:4px}
+.kc{font-size:11px;font-weight:600;margin-top:5px}
+.up{color:#15803d}.wn{color:#a16207}
+.card{background:#fff;border-radius:15px;overflow:hidden;box-shadow:0 1px 3px rgba(30,40,18,0.05),0 4px 10px rgba(30,40,18,0.04)}
+.ch{padding:14px 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #F0F4EC}
+.ct{font-size:14px;font-weight:800;color:#1A2012}
+.two{display:grid;grid-template-columns:1fr 310px;gap:16px;align-items:start}
+table{width:100%;border-collapse:collapse}
+th{background:#F8FAF5;color:#8C9C7A;font-size:11px;font-weight:700;padding:9px 14px;text-align:left;border-bottom:1px solid #EEF2E9}
+td{padding:10px 14px;border-bottom:1px solid #F0F4EC;font-size:13px;color:#1A2012;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#FAFCF8}
+.pill{display:inline-flex;align-items:center;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap}
+.pg{background:#dcfce7;color:#15803d}.pw{background:#fef9c3;color:#a16207}.pc{background:#fee2e2;color:#b91c1c}.pb{background:#dbeafe;color:#1d4ed8}
+.btn{border:none;border-radius:9px;padding:8px 16px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Pretendard',sans-serif;display:inline-flex;align-items:center;gap:5px;white-space:nowrap;transition:background .15s}
+.btp{background:#253016;color:#E4FD97}.btp:hover{background:#3D4F28}
+.btg{background:#F0F5E8;color:#253016;padding:6px 12px;font-size:12px;border-radius:7px;border:none;cursor:pointer;font-family:'Pretendard',sans-serif;font-weight:600;text-decoration:none;display:inline-flex;align-items:center}
+.btg:hover{background:#E4EDD8}
+.inq{padding:11px 18px;border-bottom:1px solid #F0F4EC;display:flex;gap:9px;align-items:flex-start}
+.inq:last-child{border-bottom:none}
+</style>
+</head>
+<body>
+
+<aside class="sb">
+  <div class="sb-logo">
+    <div class="sb-icon"><span style="font-size:15px;font-weight:900;color:#253016;font-family:Arial,sans-serif">무</span></div>
+    <div>
+      <div style="font-size:12px;font-weight:800;color:#fff;line-height:1.3">무인화연구소</div>
+      <div style="font-size:10px;color:rgba(255,255,255,0.42)">본사 어드민</div>
+    </div>
+  </div>
+  <nav class="sb-nav">
+    <div class="sb-sec">운영</div>
+    <a href="mockup-hq-대시보드.html" class="ni on">
+      <svg width="15" height="15" fill="none" viewBox="0 0 16 16"><rect x="1" y="1" width="6" height="6" rx="1.5" fill="currentColor" opacity=".85"/><rect x="9" y="1" width="6" height="6" rx="1.5" fill="currentColor" opacity=".85"/><rect x="1" y="9" width="6" height="6" rx="1.5" fill="currentColor" opacity=".85"/><rect x="9" y="9" width="6" height="6" rx="1.5" fill="currentColor" opacity=".85"/></svg>
+      대시보드
+    </a>
+    <a href="mockup-hq-지점목록.html" class="ni">
+      <svg width="15" height="15" fill="none" viewBox="0 0 16 16"><path d="M2 14V7l6-5 6 5v7H2z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><rect x="5.5" y="9" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.4"/></svg>
+      지점 목록
+    </a>
+    <a href="mockup-hq-계정관리.html" class="ni">
+      <svg width="15" height="15" fill="none" viewBox="0 0 16 16"><circle cx="8" cy="5" r="3" stroke="currentColor" stroke-width="1.4"/><path d="M2 14c0-3.314 2.686-5 6-5s6 1.686 6 5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+      계정 관리
+    </a>
+    <div class="sb-sec" style="margin-top:4px">콘텐츠</div>
+    <a href="mockup-hq-공지관리.html" class="ni">
+      <svg width="15" height="15" fill="none" viewBox="0 0 16 16"><path d="M2 12V4a1 1 0 0 1 1-1h4l1.5 2H13a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1z" stroke="currentColor" stroke-width="1.4"/></svg>
+      공지 관리
+    </a>
+    <a href="mockup-hq-자료관리.html" class="ni">
+      <svg width="15" height="15" fill="none" viewBox="0 0 16 16"><path d="M3 4.5h10M3 8h6M3 11.5h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      자료 관리
+    </a>
+    <a href="mockup-hq-문의관리.html" class="ni">
+      <svg width="15" height="15" fill="none" viewBox="0 0 16 16"><path d="M2 3a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1H5l-3 2V3z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
+      문의 관리
+    </a>
+    <a href="mockup-hq-서비스요청관리.html" class="ni">
+      <svg width="15" height="15" fill="none" viewBox="0 0 16 16"><rect x="2" y="3" width="12" height="11" rx="1.5" stroke="currentColor" stroke-width="1.4"/><path d="M5 6.5h6M5 9.5h4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><path d="M5.5 1.5h5v2h-5z" stroke="currentColor" stroke-width="1.3"/></svg>
+      서비스 요청
+    </a>
+  </nav>
+  <div class="sb-user">
+    <div class="sb-av"><span style="font-size:12px;font-weight:800;color:#E4FD97">박</span></div>
+    <div style="flex:1;min-width:0">
+      <div style="font-size:12px;font-weight:700;color:#fff">박소영</div>
+      <div style="font-size:10px;color:rgba(255,255,255,0.42)">본사 관리자</div>
+    </div>
+    <button style="background:none;border:none;cursor:pointer;padding:4px;opacity:.4;color:#fff" title="로그아웃">
+      <svg width="13" height="13" fill="none" viewBox="0 0 16 16"><path d="M6 14H3a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1h3M10 11l4-3-4-3M14 8H6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+  </div>
+</aside>
+
+<div class="main">
+  <header class="ph">
+    <div>
+      <div class="ph-title">대시보드</div>
+      <div class="ph-sub">2026년 7월 20일 일요일 · 전체 지점 기준</div>
+    </div>
+    <button class="btn btp">
+      <svg width="13" height="13" fill="none" viewBox="0 0 16 16"><path d="M8 2v9M4 7l4 4 4-4M2 13h12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      보고서 출력
+    </button>
+  </header>
+
+  <div class="content">
+    <div class="krow" style="grid-template-columns:repeat(3,1fr)">
+      <div class="kpi">
+        <div class="kl">전체 지점</div>
+        <div><span class="kv">38</span><span class="ku">개</span></div>
+        <div class="kc up">▲ 이번 달 1개 신규 등록</div>
+      </div>
+      <div class="kpi">
+        <div class="kl">미해결 문의</div>
+        <div><span class="kv" style="color:#DC2626">7</span><span class="ku">건</span></div>
+        <div class="kc wn">⚠ 48시간 초과 3건 있음</div>
+      </div>
+      <div class="kpi">
+        <div class="kl">이번 달 누적 방문</div>
+        <div><span class="kv">28,451</span><span class="ku">명</span></div>
+        <div class="kc up">▲ 전월 대비 +12.1%</div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 340px;gap:14px;align-items:start">
+      <div class="card">
+        <div class="ch">
+          <div class="ct">미해결 문의 <span style="color:#DC2626;margin-left:4px;font-size:15px">7</span></div>
+          <a href="mockup-hq-문의관리.html" class="btg">전체 보기</a>
+        </div>
+        <div>
+          <div class="inq"><span class="pill pc" style="flex-shrink:0;margin-top:1px">72h+</span><div><div style="font-size:12px;font-weight:700">키오스크 오류 — 강남구청역점</div><div style="font-size:11px;color:#8C9C7A;margin-top:2px">7월 18일 · 이재인 점주</div></div></div>
+          <div class="inq"><span class="pill pc" style="flex-shrink:0;margin-top:1px">72h+</span><div><div style="font-size:12px;font-weight:700">정산 내역 오류 — 냉천점</div><div style="font-size:11px;color:#8C9C7A;margin-top:2px">7월 18일 · 임효빈 점주</div></div></div>
+          <div class="inq"><span class="pill pc" style="flex-shrink:0;margin-top:1px">48h+</span><div><div style="font-size:12px;font-weight:700">비밀번호 초기화 요청 — 호평점</div><div style="font-size:11px;color:#8C9C7A;margin-top:2px">7월 18일 · 석정미 점주</div></div></div>
+          <div class="inq"><span class="pill pw" style="flex-shrink:0;margin-top:1px">18h</span><div><div style="font-size:12px;font-weight:700">회의실 예약 불가 — 아주대점</div><div style="font-size:11px;color:#8C9C7A;margin-top:2px">7월 20일 · 김미경 점주</div></div></div>
+          <div class="inq"><span class="pill pw" style="flex-shrink:0;margin-top:1px">12h</span><div><div style="font-size:12px;font-weight:700">소모품 교체 문의 — 잠실학원사거리점</div><div style="font-size:11px;color:#8C9C7A;margin-top:2px">7월 20일 · 백연선 점주</div></div></div>
+          <div class="inq"><span class="pill pb" style="flex-shrink:0;margin-top:1px">신규</span><div><div style="font-size:12px;font-weight:700">출입 오류 — 개포점</div><div style="font-size:11px;color:#8C9C7A;margin-top:2px">7월 21일 · 신진욱 점주</div></div></div>
+          <div class="inq"><span class="pill pb" style="flex-shrink:0;margin-top:1px">신규</span><div><div style="font-size:12px;font-weight:700">이용권 발급 문의 — 상도점</div><div style="font-size:11px;color:#8C9C7A;margin-top:2px">7월 21일 · 심미경 점주</div></div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="ch"><div class="ct">이번 달 신규 지점</div></div>
+        <div>
+          <div class="inq" style="align-items:center">
+            <div style="width:34px;height:34px;background:#F0F5E8;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="16" height="16" fill="none" viewBox="0 0 16 16"><path d="M2 14V7l6-5 6 5v7H2z" stroke="#253016" stroke-width="1.4" stroke-linejoin="round"/><rect x="5.5" y="9" width="5" height="5" rx="1" stroke="#253016" stroke-width="1.4"/></svg></div>
+            <div style="flex:1"><div style="font-size:13px;font-weight:700">강일동점</div><div style="font-size:11px;color:#8C9C7A">5월 20일 등록 · 서울 강동</div></div>
+            <span class="pill pb">신규</span>
+          </div>
+          <div class="inq" style="align-items:center">
+            <div style="width:34px;height:34px;background:#F0F5E8;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="16" height="16" fill="none" viewBox="0 0 16 16"><path d="M2 14V7l6-5 6 5v7H2z" stroke="#253016" stroke-width="1.4" stroke-linejoin="round"/><rect x="5.5" y="9" width="5" height="5" rx="1" stroke="#253016" stroke-width="1.4"/></svg></div>
+            <div style="flex:1"><div style="font-size:13px;font-weight:700">용인동백역점</div><div style="font-size:11px;color:#8C9C7A">3월 1일 등록 · 경기 용인</div></div>
+            <span class="pill pw">점검중</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>앤딩 오너 — 자료실</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+  *, *::before, *::after { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body { font-family: 'Pretendard', sans-serif; background: #CDD6C2; min-height: 100vh; display: flex; justify-content: center; padding: 32px 0; }
+  .phone { width: 375px; background: #E8EDE1; min-height: 100vh; position: relative; box-shadow: 0 20px 70px rgba(0,0,0,0.22); }
+
+  .cat-chip { flex-shrink: 0; padding: 6px 14px; border-radius: 99px; font-size: 11px; font-weight: 700; cursor: pointer; border: 1.5px solid #D8E0CF; background: #fff; color: #5A6A48; font-family: 'Pretendard', sans-serif; transition: all 0.12s; }
+  .cat-chip.active { background: #253016; color: #E4FD97; border-color: #253016; }
+
+  .search-wrap { position: relative; }
+  .search-icon { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); font-size: 13px; color: #8C9C7A; }
+  .search-input { width: 100%; background: #fff; border: 1.5px solid #D8E0CF; border-radius: 11px; padding: 9px 12px 9px 33px; font-size: 13px; color: #1A2012; outline: none; font-family: 'Pretendard', sans-serif; }
+  .search-input::placeholder { color: #A8B89C; }
+  .search-input:focus { border-color: #253016; }
+
+  .file-card { background: #fff; border-radius: 16px; padding: 12px 14px; box-shadow: 0 1px 2px rgba(30,40,18,0.04), 0 4px 12px rgba(30,40,18,0.06); display: flex; align-items: center; gap: 12px; text-decoration: none; transition: transform 0.1s; }
+  .file-card:active { transform: scale(0.98); }
+
+  .file-icon { width: 40px; height: 40px; border-radius: 11px; display: flex; align-items: center; justify-content: center; font-size: 19px; flex-shrink: 0; }
+
+  .src-notion { width: 32px; height: 32px; background: #fff; border: 1.5px solid #E8EDE1; border-radius: 9px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .src-drive  { width: 32px; height: 32px; background: #fff; border: 1.5px solid #E8EDE1; border-radius: 9px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+
+  .sec-label { font-size: 10.5px; font-weight: 700; color: #8C9C7A; letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 8px; }
+
+  .tab-bar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 375px; background: rgba(255,255,255,0.93); backdrop-filter: blur(16px); border-top: 1px solid rgba(0,0,0,0.06); display: flex; z-index: 50; }
+  .tab-item { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 10px 0 9px; gap: 3px; text-decoration: none; }
+</style>
+</head>
+<body>
+<div class="phone pb-28">
+
+  <!-- 헤더 -->
+  <div style="background:#253016;padding:13px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:40">
+    <span style="color:white;font-size:16px;font-weight:700;letter-spacing:-0.3px">자료실</span>
+    <div style="display:flex;align-items:center;gap:10px">
+      <span style="color:#E4FD97;font-size:12px;font-weight:700">강남구청역점</span>
+      <button onclick="openSettings()" style="width:30px;height:30px;background:rgba(255,255,255,0.1);border-radius:8px;display:flex;align-items:center;justify-content:center;border:none;cursor:pointer">
+        <span style="color:rgba(255,255,255,0.65);font-size:15px">⚙</span>
+      </button>
+    </div>
+  </div>
+
+  <div style="padding:12px 16px 0;display:flex;flex-direction:column;gap:10px">
+
+    <!-- 검색 -->
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input class="search-input" placeholder="자료명 검색">
+    </div>
+
+    <!-- 카테고리 칩 -->
+    <div style="display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px">
+      <button class="cat-chip active" onclick="filterCat(this,'all')">전체</button>
+      <button class="cat-chip" onclick="filterCat(this,'운영')">매뉴얼</button>
+      <button class="cat-chip" onclick="filterCat(this,'마케팅')">마케팅</button>
+      <button class="cat-chip" onclick="filterCat(this,'양식')">안내문</button>
+      <button class="cat-chip" onclick="filterCat(this,'브랜드')">브랜드</button>
+    </div>
+
+  </div>
+
+  <!-- 파일 목록 -->
+  <div id="fileList" style="padding:14px 16px 0;display:flex;flex-direction:column;gap:16px">
+
+    <!-- 최근 추가 -->
+    <div class="sec-group" data-label="최근 추가">
+      <div class="sec-label">최근 추가</div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+
+        <a class="file-card" data-cat="마케팅" href="#" target="_blank" rel="noopener">
+          <div class="file-icon" style="background:#F0FBF4">🖼️</div>
+          <div style="flex:1;min-width:0">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px">
+              <p style="font-size:13px;font-weight:700;color:#1A2012;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">7월 SNS 콘텐츠 소재 패키지</p>
+              <span style="flex-shrink:0;font-size:9px;font-weight:800;background:#DCFCE7;color:#15803D;padding:2px 6px;border-radius:99px">NEW</span>
+            </div>
+            <p style="font-size:10px;color:#8C9C7A">구글 드라이브 · 2026-07-01</p>
+          </div>
+          <div class="src-drive">
+            <svg width="18" height="16" viewBox="0 0 57 51" fill="none"><path d="M19.5 32.5H37.5L47.5 50H9.5L19.5 32.5Z" fill="#4285F4"/><path d="M19.5 32.5L9.5 50L0 33L18.5 1H30L19.5 32.5Z" fill="#34A853"/><path d="M37.5 32.5L30 19.5L18.5 1H39L57 33L47.5 50L37.5 32.5Z" fill="#FBBC04"/></svg>
+          </div>
+        </a>
+
+        <a class="file-card" data-cat="운영" href="#" target="_blank" rel="noopener">
+          <div class="file-icon" style="background:#EBF5FF">📄</div>
+          <div style="flex:1;min-width:0">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px">
+              <p style="font-size:13px;font-weight:700;color:#1A2012;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">2026년 점주 운영 매뉴얼 v3.2</p>
+              <span style="flex-shrink:0;font-size:9px;font-weight:800;background:#DCFCE7;color:#15803D;padding:2px 6px;border-radius:99px">NEW</span>
+            </div>
+            <p style="font-size:10px;color:#8C9C7A">노션 페이지 · 2026-07-10</p>
+          </div>
+          <div class="src-notion">
+            <span style="color:#1A1A1A;font-size:17px;font-weight:900;line-height:1;font-family:Arial,sans-serif">N</span>
+          </div>
+        </a>
+
+      </div>
+    </div>
+
+    <!-- 운영 매뉴얼 -->
+    <div class="sec-group" data-label="운영 매뉴얼">
+      <div class="sec-label">매뉴얼</div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+
+        <a class="file-card" data-cat="운영" href="#" target="_blank" rel="noopener">
+          <div class="file-icon" style="background:#FFF3E6">🔧</div>
+          <div style="flex:1;min-width:0">
+            <p style="font-size:13px;font-weight:700;color:#1A2012;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px">키오스크 오류 대응 가이드</p>
+            <p style="font-size:10px;color:#8C9C7A">노션 페이지 · 2026-05-20</p>
+          </div>
+          <div class="src-notion">
+            <span style="color:#1A1A1A;font-size:17px;font-weight:900;line-height:1;font-family:Arial,sans-serif">N</span>
+          </div>
+        </a>
+
+        <a class="file-card" data-cat="운영" href="#" target="_blank" rel="noopener">
+          <div class="file-icon" style="background:#EBF5FF">📋</div>
+          <div style="flex:1;min-width:0">
+            <p style="font-size:13px;font-weight:700;color:#1A2012;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px">월간 점검 체크리스트</p>
+            <p style="font-size:10px;color:#8C9C7A">구글 드라이브 · 2026-04-01</p>
+          </div>
+          <div class="src-drive">
+            <svg width="18" height="16" viewBox="0 0 57 51" fill="none"><path d="M19.5 32.5H37.5L47.5 50H9.5L19.5 32.5Z" fill="#4285F4"/><path d="M19.5 32.5L9.5 50L0 33L18.5 1H30L19.5 32.5Z" fill="#34A853"/><path d="M37.5 32.5L30 19.5L18.5 1H39L57 33L47.5 50L37.5 32.5Z" fill="#FBBC04"/></svg>
+          </div>
+        </a>
+
+        <a class="file-card" data-cat="운영" href="#" target="_blank" rel="noopener">
+          <div class="file-icon" style="background:#FEF3F2">🔥</div>
+          <div style="flex:1;min-width:0">
+            <p style="font-size:13px;font-weight:700;color:#1A2012;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px">비상 상황 대응 매뉴얼</p>
+            <p style="font-size:10px;color:#8C9C7A">노션 페이지 · 2026-03-15</p>
+          </div>
+          <div class="src-notion">
+            <span style="color:#1A1A1A;font-size:17px;font-weight:900;line-height:1;font-family:Arial,sans-serif">N</span>
+          </div>
+        </a>
+
+      </div>
+    </div>
+
+    <!-- 마케팅 -->
+    <div class="sec-group" data-label="마케팅">
+      <div class="sec-label">마케팅</div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+
+        <a class="file-card" data-cat="마케팅" href="#" target="_blank" rel="noopener">
+          <div class="file-icon" style="background:#F0FBF4">📣</div>
+          <div style="flex:1;min-width:0">
+            <p style="font-size:13px;font-weight:700;color:#1A2012;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px">네이버 스마트플레이스 등록 가이드</p>
+            <p style="font-size:10px;color:#8C9C7A">노션 페이지 · 2026-06-10</p>
+          </div>
+          <div class="src-notion">
+            <span style="color:#1A1A1A;font-size:17px;font-weight:900;line-height:1;font-family:Arial,sans-serif">N</span>
+          </div>
+        </a>
+
+        <a class="file-card" data-cat="마케팅" href="#" target="_blank" rel="noopener">
+          <div class="file-icon" style="background:#FFF8E6">⭐</div>
+          <div style="flex:1;min-width:0">
+            <p style="font-size:13px;font-weight:700;color:#1A2012;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px">리뷰 관리 & 답변 예시 모음</p>
+            <p style="font-size:10px;color:#8C9C7A">노션 페이지 · 2026-05-01</p>
+          </div>
+          <div class="src-notion">
+            <span style="color:#1A1A1A;font-size:17px;font-weight:900;line-height:1;font-family:Arial,sans-serif">N</span>
+          </div>
+        </a>
+
+        <a class="file-card" data-cat="마케팅" href="#" target="_blank" rel="noopener">
+          <div class="file-icon" style="background:#FEF3F2">🎯</div>
+          <div style="flex:1;min-width:0">
+            <p style="font-size:13px;font-weight:700;color:#1A2012;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px">당근 비즈프로필 운영 가이드</p>
+            <p style="font-size:10px;color:#8C9C7A">노션 페이지 · 2026-04-15</p>
+          </div>
+          <div class="src-notion">
+            <span style="color:#1A1A1A;font-size:17px;font-weight:900;line-height:1;font-family:Arial,sans-serif">N</span>
+          </div>
+        </a>
+
+      </div>
+    </div>
+
+    <!-- 안내문·양식 -->
+    <div class="sec-group" data-label="안내문">
+      <div class="sec-label">안내문</div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+
+        <a class="file-card" data-cat="양식" href="#" target="_blank" rel="noopener">
+          <div class="file-icon" style="background:#FFF8E6">🖨️</div>
+          <div style="flex:1;min-width:0">
+            <p style="font-size:13px;font-weight:700;color:#1A2012;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px">이용 안내문 (A4 출력용)</p>
+            <p style="font-size:10px;color:#8C9C7A">구글 드라이브 · 2026-03-01</p>
+          </div>
+          <div class="src-drive">
+            <svg width="18" height="16" viewBox="0 0 57 51" fill="none"><path d="M19.5 32.5H37.5L47.5 50H9.5L19.5 32.5Z" fill="#4285F4"/><path d="M19.5 32.5L9.5 50L0 33L18.5 1H30L19.5 32.5Z" fill="#34A853"/><path d="M37.5 32.5L30 19.5L18.5 1H39L57 33L47.5 50L37.5 32.5Z" fill="#FBBC04"/></svg>
+          </div>
+        </a>
+
+        <a class="file-card" data-cat="양식" href="#" target="_blank" rel="noopener">
+          <div class="file-icon" style="background:#FFF8E6">📝</div>
+          <div style="flex:1;min-width:0">
+            <p style="font-size:13px;font-weight:700;color:#1A2012;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px">회의실 이용 신청서 양식</p>
+            <p style="font-size:10px;color:#8C9C7A">구글 드라이브 · 2026-02-15</p>
+          </div>
+          <div class="src-drive">
+            <svg width="18" height="16" viewBox="0 0 57 51" fill="none"><path d="M19.5 32.5H37.5L47.5 50H9.5L19.5 32.5Z" fill="#4285F4"/><path d="M19.5 32.5L9.5 50L0 33L18.5 1H30L19.5 32.5Z" fill="#34A853"/><path d="M37.5 32.5L30 19.5L18.5 1H39L57 33L47.5 50L37.5 32.5Z" fill="#FBBC04"/></svg>
+          </div>
+        </a>
+
+      </div>
+    </div>
+
+    <!-- 브랜드 자료 -->
+    <div class="sec-group" data-label="브랜드">
+      <div class="sec-label">브랜드</div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+
+        <a class="file-card" data-cat="브랜드" href="#" target="_blank" rel="noopener">
+          <div class="file-icon" style="background:#E5F5F0">🎨</div>
+          <div style="flex:1;min-width:0">
+            <p style="font-size:13px;font-weight:700;color:#1A2012;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px">브랜드 로고 및 폰트 패키지</p>
+            <p style="font-size:10px;color:#8C9C7A">구글 드라이브 · 2025-09-01</p>
+          </div>
+          <div class="src-drive">
+            <svg width="18" height="16" viewBox="0 0 57 51" fill="none"><path d="M19.5 32.5H37.5L47.5 50H9.5L19.5 32.5Z" fill="#4285F4"/><path d="M19.5 32.5L9.5 50L0 33L18.5 1H30L19.5 32.5Z" fill="#34A853"/><path d="M37.5 32.5L30 19.5L18.5 1H39L57 33L47.5 50L37.5 32.5Z" fill="#FBBC04"/></svg>
+          </div>
+        </a>
+
+        <a class="file-card" data-cat="브랜드" href="#" target="_blank" rel="noopener">
+          <div class="file-icon" style="background:#E5F5F0">🖼️</div>
+          <div style="flex:1;min-width:0">
+            <p style="font-size:13px;font-weight:700;color:#1A2012;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px">앤딩 CI 가이드라인 2025</p>
+            <p style="font-size:10px;color:#8C9C7A">구글 드라이브 · 2025-08-10</p>
+          </div>
+          <div class="src-drive">
+            <svg width="18" height="16" viewBox="0 0 57 51" fill="none"><path d="M19.5 32.5H37.5L47.5 50H9.5L19.5 32.5Z" fill="#4285F4"/><path d="M19.5 32.5L9.5 50L0 33L18.5 1H30L19.5 32.5Z" fill="#34A853"/><path d="M37.5 32.5L30 19.5L18.5 1H39L57 33L47.5 50L37.5 32.5Z" fill="#FBBC04"/></svg>
+          </div>
+        </a>
+
+      </div>
+    </div>
+
+    <div style="height:4px"></div>
+  </div>
+
+  <!-- 설정 패널 -->
+  <div id="settingsModal" style="display:none;position:fixed;top:32px;left:50%;transform:translateX(-50%);width:375px;height:calc(100vh - 32px);background:#E8EDE1;z-index:300;overflow-y:auto;">
+    <div style="background:#253016;padding:13px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10">
+      <button onclick="closeSettings()" style="width:30px;height:30px;background:rgba(255,255,255,0.1);border-radius:8px;display:flex;align-items:center;justify-content:center;border:none;cursor:pointer">
+        <svg width="18" height="18" fill="none" viewBox="0 0 18 18"><path d="M11 4L6 9l5 5" stroke="rgba(255,255,255,0.8)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <span style="color:white;font-size:16px;font-weight:700">설정</span>
+      <div style="width:30px"></div>
+    </div>
+    <div style="padding:16px;display:flex;flex-direction:column;gap:12px">
+      <div>
+        <p style="font-size:11px;font-weight:700;color:#8C9C7A;letter-spacing:0.4px;margin-bottom:8px">회원정보</p>
+        <div style="background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 1px 2px rgba(30,40,18,0.04),0 4px 12px rgba(30,40,18,0.06)">
+          <div style="display:flex;align-items:center;padding:14px 16px;border-bottom:1px solid #F0F4EC">
+            <span style="font-size:12px;color:#8C9C7A;width:72px;flex-shrink:0">지점명</span>
+            <span style="font-size:14px;font-weight:600;color:#1A2012">강남구청역점</span>
+          </div>
+          <div style="display:flex;align-items:center;padding:14px 16px;border-bottom:1px solid #F0F4EC">
+            <span style="font-size:12px;color:#8C9C7A;width:72px;flex-shrink:0">성함</span>
+            <span style="font-size:14px;font-weight:600;color:#1A2012">홍길동</span>
+          </div>
+          <div style="display:flex;align-items:center;padding:14px 16px;border-bottom:1px solid #F0F4EC">
+            <span style="font-size:12px;color:#8C9C7A;width:72px;flex-shrink:0">이메일</span>
+            <span style="font-size:13px;font-weight:600;color:#1A2012">hong@muinlab.io</span>
+          </div>
+          <div style="display:flex;align-items:center;padding:14px 16px">
+            <span style="font-size:12px;color:#8C9C7A;width:72px;flex-shrink:0">비밀번호</span>
+            <span style="font-size:16px;color:#A8B89C;letter-spacing:3px">••••••</span>
+            <span style="flex:1"></span>
+            <button onclick="openPwFromSettings()" style="font-size:12px;color:#253016;font-weight:700;background:#F0F4EC;border:none;border-radius:8px;padding:5px 10px;cursor:pointer;font-family:'Pretendard',sans-serif">변경</button>
+          </div>
+        </div>
+      </div>
+      <button onclick="confirmLogout()" style="width:100%;background:#fff;color:#DC2626;border:1.5px solid #FECACA;border-radius:13px;padding:14px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Pretendard',sans-serif;margin-top:8px">로그아웃</button>
+    </div>
+  </div>
+  <!-- 로그아웃 확인 -->
+  <div id="logoutConfirm" style="display:none;position:fixed;top:0;left:50%;transform:translateX(-50%);width:375px;height:100vh;background:rgba(0,0,0,0.45);z-index:500;align-items:center;justify-content:center;">
+    <div style="background:#fff;border-radius:20px;padding:24px;margin:0 20px;text-align:center">
+      <p style="font-size:15px;font-weight:800;color:#1A2012;margin-bottom:6px">로그아웃</p>
+      <p style="font-size:13px;color:#5A6A48;line-height:1.6;margin-bottom:20px">정말 로그아웃하시겠습니까?</p>
+      <div style="display:flex;gap:8px">
+        <button onclick="document.getElementById('logoutConfirm').style.display='none'" style="flex:1;background:#F0F4EC;color:#5A6A48;font-size:13px;font-weight:700;padding:12px;border-radius:12px;border:none;cursor:pointer;font-family:'Pretendard',sans-serif">취소</button>
+        <button onclick="doLogout()" style="flex:1;background:#DC2626;color:#fff;font-size:13px;font-weight:700;padding:12px;border-radius:12px;border:none;cursor:pointer;font-family:'Pretendard',sans-serif">로그아웃</button>
+      </div>
+    </div>
+  </div>
+  <!-- 비밀번호 변경 모달 -->
+  <div id="pwModal" style="display:none;position:fixed;top:32px;left:50%;transform:translateX(-50%);width:375px;height:calc(100vh - 32px);background:#E8EDE1;z-index:300;overflow-y:auto;">
+    <div style="background:#253016;padding:13px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10">
+      <button onclick="closePwModal()" style="width:30px;height:30px;background:rgba(255,255,255,0.1);border-radius:8px;display:flex;align-items:center;justify-content:center;border:none;cursor:pointer">
+        <svg width="18" height="18" fill="none" viewBox="0 0 18 18"><path d="M11 4L6 9l5 5" stroke="rgba(255,255,255,0.8)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <span style="color:white;font-size:16px;font-weight:700">비밀번호 변경</span>
+      <div style="width:30px"></div>
+    </div>
+
+    <div id="pwForm" style="padding:20px 16px;display:flex;flex-direction:column;gap:16px">
+      <div style="background:#FFFBEB;border:1px solid #FDE68A;border-radius:12px;padding:12px 14px;display:flex;gap:10px;align-items:flex-start">
+        <span style="font-size:17px;flex-shrink:0">🔑</span>
+        <div>
+          <p style="font-size:12px;font-weight:700;color:#92400E;margin-bottom:3px">기본 비밀번호를 변경해주세요</p>
+          <p style="font-size:11px;color:#B45309;line-height:1.5">처음 발급받은 기본 비밀번호(123456)는 보안을 위해 꼭 변경해주세요.</p>
+        </div>
+      </div>
+
+      <div>
+        <label style="font-size:12px;font-weight:700;color:#3A4D28;display:block;margin-bottom:6px">현재 비밀번호</label>
+        <div style="position:relative">
+          <input id="pwCurrent" type="password" placeholder="현재 비밀번호 입력" style="width:100%;background:#fff;border:1.5px solid #D8E0CF;border-radius:11px;padding:11px 52px 11px 14px;font-size:14px;color:#1A2012;outline:none;font-family:'Pretendard',sans-serif" onfocus="this.style.borderColor='#253016'" onblur="this.style.borderColor='#D8E0CF'">
+          <button type="button" onclick="togglePw('pwCurrent',this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#8C9C7A;font-size:12px;font-weight:600;padding:0;font-family:'Pretendard',sans-serif">보기</button>
+        </div>
+      </div>
+
+      <div>
+        <label style="font-size:12px;font-weight:700;color:#3A4D28;display:block;margin-bottom:6px">새 비밀번호</label>
+        <div style="position:relative">
+          <input id="pwNew" type="password" placeholder="새 비밀번호 (6자 이상)" style="width:100%;background:#fff;border:1.5px solid #D8E0CF;border-radius:11px;padding:11px 52px 11px 14px;font-size:14px;color:#1A2012;outline:none;font-family:'Pretendard',sans-serif" onfocus="this.style.borderColor='#253016'" onblur="this.style.borderColor='#D8E0CF'">
+          <button type="button" onclick="togglePw('pwNew',this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#8C9C7A;font-size:12px;font-weight:600;padding:0;font-family:'Pretendard',sans-serif">보기</button>
+        </div>
+      </div>
+
+      <div>
+        <label style="font-size:12px;font-weight:700;color:#3A4D28;display:block;margin-bottom:6px">새 비밀번호 확인</label>
+        <div style="position:relative">
+          <input id="pwConfirm" type="password" placeholder="새 비밀번호 재입력" style="width:100%;background:#fff;border:1.5px solid #D8E0CF;border-radius:11px;padding:11px 52px 11px 14px;font-size:14px;color:#1A2012;outline:none;font-family:'Pretendard',sans-serif" onfocus="this.style.borderColor='#253016'" onblur="this.style.borderColor='#D8E0CF'">
+          <button type="button" onclick="togglePw('pwConfirm',this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#8C9C7A;font-size:12px;font-weight:600;padding:0;font-family:'Pretendard',sans-serif">보기</button>
+        </div>
+      </div>
+
+      <div id="pwError" style="display:none;background:#FEF3F2;border:1px solid #FECACA;border-radius:10px;padding:10px 14px">
+        <p id="pwErrorMsg" style="font-size:12px;color:#DC2626;font-weight:600;margin:0"></p>
+      </div>
+
+      <button onclick="submitPwChange()" style="background:#253016;color:#E4FD97;border:none;border-radius:13px;padding:14px;font-size:15px;font-weight:700;width:100%;cursor:pointer;font-family:'Pretendard',sans-serif;margin-top:4px">비밀번호 변경</button>
+    </div>
+
+    <div id="pwSuccess" style="display:none;padding:60px 16px;flex-direction:column;align-items:center;gap:16px;text-align:center">
+      <div style="width:72px;height:72px;background:#DCFCE7;border-radius:50%;display:flex;align-items:center;justify-content:center">
+        <svg width="32" height="32" fill="none" viewBox="0 0 32 32"><path d="M6 16l7 7 13-13" stroke="#16a34a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div>
+        <p style="font-size:18px;font-weight:800;color:#1A2012;margin-bottom:8px">비밀번호가 변경되었습니다</p>
+        <p style="font-size:13px;color:#5A6A48;line-height:1.6">다음 로그인부터<br>새 비밀번호를 사용해주세요.</p>
+      </div>
+      <button onclick="closePwModal()" style="background:#253016;color:#E4FD97;border:none;border-radius:13px;padding:13px 32px;font-size:15px;font-weight:700;cursor:pointer;font-family:'Pretendard',sans-serif;margin-top:8px">확인</button>
+    </div>
+  </div>
+
+  <!-- 하단 탭바 -->
+  <div class="tab-bar">
+    <a href="mockup-홈-v2.html" class="tab-item">
+      <div style="height:3px;margin-bottom:2px"></div>
+      <span style="font-size:18px">🏠</span>
+      <span style="font-size:9.5px;font-weight:500;color:#8C9C7A">홈</span>
+    </a>
+    <a href="mockup-공지목록.html" class="tab-item">
+      <div style="height:3px;margin-bottom:2px"></div>
+      <span style="font-size:18px">📢</span>
+      <span style="font-size:9.5px;font-weight:500;color:#8C9C7A">공지</span>
+    </a>
+    <a href="mockup-자료실.html" class="tab-item">
+      <div style="width:20px;height:3px;border-radius:99px;background:#253016;margin-bottom:2px"></div>
+      <span style="font-size:18px">📁</span>
+      <span style="font-size:9.5px;font-weight:700;color:#4A5E2C">자료실</span>
+    </a>
+    <a href="mockup-문의목록.html" class="tab-item">
+      <div style="height:3px;margin-bottom:2px"></div>
+      <span style="font-size:18px">💬</span>
+      <span style="font-size:9.5px;font-weight:500;color:#8C9C7A">문의</span>
+    </a>
+  </div>
+
+</div>
+
+<script>
+function openSettings(){
+  document.getElementById('settingsModal').style.display='block';
+}
+function closeSettings(){
+  document.getElementById('settingsModal').style.display='none';
+}
+function openPwFromSettings(){
+  closeSettings();
+  openPwModal();
+}
+function confirmLogout(){
+  const d=document.getElementById('logoutConfirm');
+  d.style.display='flex';d.style.alignItems='center';d.style.justifyContent='center';
+}
+function doLogout(){
+  document.getElementById('logoutConfirm').style.display='none';
+  alert('로그아웃 되었습니다.');
+}
+function openPwModal(){
+  ['pwCurrent','pwNew','pwConfirm'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('pwError').style.display='none';
+  document.getElementById('pwForm').style.display='flex';
+  document.getElementById('pwSuccess').style.display='none';
+  document.getElementById('pwModal').style.display='block';
+}
+function closePwModal(){ document.getElementById('pwModal').style.display='none'; }
+function togglePw(id,btn){
+  const i=document.getElementById(id);
+  i.type=i.type==='password'?'text':'password';
+  btn.textContent=i.type==='password'?'보기':'숨기기';
+}
+function submitPwChange(){
+  const c=document.getElementById('pwCurrent').value;
+  const n=document.getElementById('pwNew').value;
+  const conf=document.getElementById('pwConfirm').value;
+  const err=document.getElementById('pwError');
+  const msg=document.getElementById('pwErrorMsg');
+  if(!c){msg.textContent='현재 비밀번호를 입력해주세요.';err.style.display='block';return;}
+  if(n.length<6){msg.textContent='새 비밀번호는 6자 이상이어야 합니다.';err.style.display='block';return;}
+  if(n!==conf){msg.textContent='새 비밀번호가 일치하지 않습니다.';err.style.display='block';return;}
+  err.style.display='none';
+  document.getElementById('pwForm').style.display='none';
+  const s=document.getElementById('pwSuccess');
+  s.style.display='flex';s.style.flexDirection='column';s.style.alignItems='center';
+}
+
+function filterCat(el, key) {
+  document.querySelectorAll('.cat-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  const groups = document.querySelectorAll('.sec-group');
+  if (key === 'all') {
+    document.querySelectorAll('.file-card').forEach(c => c.style.display = 'flex');
+    groups.forEach(g => g.style.display = 'block');
+  } else {
+    groups.forEach(g => {
+      const cards = [...g.querySelectorAll('.file-card')];
+      const hasMatch = cards.some(c => c.dataset.cat === key);
+      g.style.display = hasMatch ? 'block' : 'none';
+      cards.forEach(c => { c.style.display = c.dataset.cat === key ? 'flex' : 'none'; });
+    });
+  }
+}
+</script>
+</body>
+</html>
