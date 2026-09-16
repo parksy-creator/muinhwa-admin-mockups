@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
@@ -35,6 +35,11 @@
 
   .panel { display: none; }
   .panel.active { display: block; }
+  /* 실제 모바일: 폰 프레임 제거, 전체화면 */
+  @media (max-width: 480px) {
+    body { padding: 0; background: #E8EDE1; overflow: auto; }
+    .phone { width: 100%; box-shadow: none; min-height: 100dvh; }
+  }
 </style>
 </head>
 <body>
