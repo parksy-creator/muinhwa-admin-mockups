@@ -1,8 +1,8 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=1280,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>본사 어드민 — 계정 관리</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <style>
@@ -63,6 +63,24 @@ input:focus,select:focus{border-color:#253016}
 .av-1{background:#C7D2FE;color:#3730A3}
 .av-2{background:#FED7AA;color:#9A3412}
 .av-3{background:#BBF7D0;color:#14532D}
+  /* ── 모바일 반응형 ── */
+  .hbg{display:none;position:absolute;left:14px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;padding:4px;flex-direction:column;gap:4px;z-index:60}
+  .hbg span{display:block;width:18px;height:2px;background:#1A2012;border-radius:2px}
+  .sb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:150}
+  .sb-overlay.show{display:block}
+  @media(max-width:768px){
+    body{min-width:0}
+    .sb{transform:translateX(-220px);transition:transform .25s ease;z-index:200}
+    .sb.open{transform:translateX(0)}
+    .main{margin-left:0}
+    .ph{padding-left:52px;position:sticky;top:0}
+    .content{padding:14px 16px}
+    .krow{grid-template-columns:repeat(2,1fr)!important;gap:10px}
+    .two{grid-template-columns:1fr!important}
+    .hbg{display:flex}
+    table{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch;white-space:nowrap}
+    .tab-group{overflow-x:auto;white-space:nowrap}
+  }
 </style>
 </head>
 <body>
@@ -525,6 +543,30 @@ function openDeactivate(name){
   const m = document.getElementById('deactivateModal');
   m.style.display='flex'; m.style.alignItems='center'; m.style.justifyContent='center';
 }
+</script>
+<script>
+(function(){
+  var sb=document.querySelector('.sb');
+  var ph=document.querySelector('.ph');
+  if(!sb||!ph)return;
+  var ov=document.createElement('div');
+  ov.className='sb-overlay';
+  document.body.appendChild(ov);
+  var hbg=document.createElement('button');
+  hbg.className='hbg';
+  hbg.setAttribute('aria-label','메뉴');
+  hbg.innerHTML='<span></span><span></span><span></span>';
+  ph.style.position='relative';
+  ph.appendChild(hbg);
+  hbg.addEventListener('click',function(){
+    sb.classList.toggle('open');
+    ov.classList.toggle('show');
+  });
+  ov.addEventListener('click',function(){
+    sb.classList.remove('open');
+    ov.classList.remove('show');
+  });
+})();
 </script>
 </body>
 </html>
